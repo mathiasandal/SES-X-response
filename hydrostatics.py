@@ -22,6 +22,8 @@ M = volume_displacement * rho  # [kg] total mass of the vessel
 
 h = p_0/rho/g  # [m] Difference in water level inside and outside the air cushion
 
+h_b = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion i suppressed.
+
 A_b = L * b_c  # [m] Area of the air cushion
 
 V_b = M / rho - p_0 * A_b / rho / g  # [m^3] hull volume under the mean free surface with a cushion excess pressure.
