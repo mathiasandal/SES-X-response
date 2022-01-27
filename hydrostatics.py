@@ -16,25 +16,28 @@ rho = 1025  # [kg/m^3] density of sea water
 p_a = 101325  # [Pa] atmospheric pressure
 g = 9.81  # [m/s^2] acceleration of gravity
 
+h = p_0 / rho / g  # [m] Difference in water level inside and outside the air cushion
 
-volume_displacement = 2 * L * d * b_G  # [m^3] volume displacement without excess air cushion pressure
-M = volume_displacement * rho  # [kg] total mass of the vessel
-
-h = p_0/rho/g  # [m] Difference in water level inside and outside the air cushion
-
-h_b = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion i suppressed.
+h_b = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion is suppressed
 
 A_b = L * b_c  # [m] Area of the air cushion
 
-V_b = M / rho - p_0 * A_b / rho / g  # [m^3] hull volume under the mean free surface with a cushion excess pressure.
-M_hulls = V_b * rho  # [kg] mass displacement of the side hulls
+volume_displacement = 2 * L * d * b_G  # [m^3] volume displacement without excess air cushion pressure
+
+lift_hull = volume_displacement * rho * g  # [N] hydrostatic force from the side hulls
+
+lift_air_cushion = p_0 * A_b  # [N]  lift force provided from the air cushion
+
+M = lift_hull / g + lift_air_cushion / g  # [kg] total mass of the vessel
 
 decimal_precision = 2
 
-air_cushion_volume = A_b * h  # [m^3] volume of the air cushion # TODO: need to check if this is the correct definition
+air_cushion_volume = A_b * (h_hull - d)  # [m^3] volume of the air cushion
 
-print('h =', h, '[m]')
+print('h =', round(h, 2), '[m]')
 print('Displacement\t\t\t\t', round(M / 1000, decimal_precision), '[tonnes]', sep='\t')
-print('Displacement of the side hulls', round(M_hulls / 1000, decimal_precision), '[tonnes]', sep='\t')
-print('Lift from the air cushion\t', round(p_0 * A_b / g / 1000, decimal_precision), '[tonnes]', sep='\t')
+print('Displacement of the side hulls', round(lift_hull / g / 1000, decimal_precision), '[tonnes]', sep='\t')
+print('Lift from the air cushion\t', round(lift_air_cushion / g / 1000, decimal_precision), '[tonnes]', sep='\t')
 print('Volume of the air cushion\t', round(air_cushion_volume, decimal_precision), '[m^3]', sep='\t')
+
+print('Lift fraction provided by the air cushion: ', round(lift_air_cushion / (M * g) * 100, decimal_precision), '%', sep="")
