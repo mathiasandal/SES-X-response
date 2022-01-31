@@ -1,0 +1,56 @@
+99
+DATA-CHECK PROPERTIES
+Run name:  veres_Run_w_air_cushion
+
+Ship name: TaskConceptual_SES_contours_slim_side_hulls_imported
+Loading condition description:  Design waterline
+
+ShipX exported data
+Main dimensions (from input):
+______________________________________________________________
+
+Length between perpendiculars    (m)     20.000
+Breadth                          (m)      8.000
+Draught, midship                 (m)      0.500
+Sinkage                          (m)      0.000
+Trim, + = aft                  (deg)      0.000
+______________________________________________________________
+
+Number of hulls:   2  -> Catamaran
+
+Data for air cushion no.  1:
+Static cushion pressure                      (kPa)      3.499
+Leakage                                   (m**3/s)     11.915
+Inverse slope of fan characteristics                   -0.006
+Volume of air cushion                       (m**3)    210.000
+Surface area of air cushion                 (m**2)    140.000
+Longitudinal volume center from AP             (m)     10.000
+Bow seal type: Finger seal
+Longitudinal position of bow seal              (m)     20.000
+Stern seal type: Lobe bag
+Excess membrane pressure                     (kPa)      0.000
+Longitudinal position of stern seal            (m)      0.000
+Ride control parameter                         ( )      0.000
+
+Coefficients for data check etc.:
+Type                                  Specified    Calculated
+______________________________________________________________
+
+Displacement                (tonnes)      10.41         60.17*
+Displacement of side hulls  (tonnes)                    10.24*
+Lift from air cushion       (tonnes)                    49.94*
+Vertical center of buoyancy,     KB                     0.250*
+Vertical center of gravity,      VCG      0.500*
+Longitudinal center of buoyancy, LCB                   10.000*
+Longitudinal center of gravity,  LCG     10.000        10.000*
+Longitudinal center of lift,     LCL                   10.000*
+Longitudinal metacentric height, GMl                   11.183*
+Transverse metacentric height,   GMt                    4.611*
+Roll radius of gyration,         r44      1.000*
+Pitch radius of gyration,        r55      1.000*
+Yaw radius of gyration,          r66      1.000*
+Roll-yaw radius of gyration,     r46      0.000*
+______________________________________________________________
+
+* - Applied in the hydrodynamic calculations
+
