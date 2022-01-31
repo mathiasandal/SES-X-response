@@ -42,18 +42,20 @@ def read_re7_file(filename):
     ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the mo􀆟on coordinate system (relative to BL)
 
     # Read in mass matrix
-    VMAS = np.zeros([NDOF, NDOF])  # Initialize mass matrix
+    VMAS = np.zeros([6, 6])  # Initialize mass matrix. Has the size (6x6) regardless if there is an air cushion or not.
 
-    for j in range(NDOF):  # Read and converts each line from string to floats
+    for j in range(6):  # Read and converts each line from string to floats
         VMAS[j, :] = [float(i) for i in f.readline().split()]
 
     # Have one (NDOF x NDOF) matrix for each combinations of velocity, heading and wave frequency
+    # "Additional" matrices has the size (6x6) regardless if there is an air cushion or not.
     ADDMAS = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Hydrodynamic added mass
-    ADDADDMAS = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Additional added mass
+    ADDADDMAS = np.zeros([NOVEL, NOHEAD, NOFREQ, 6, 6])  # Additional added mass
     DAMP = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Hydrodynamic damping
-    ADDDAMP = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Additional damping
+    ADDDAMP = np.zeros([NOVEL, NOHEAD, NOFREQ, 6, 6])  # Additional damping
     REST = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Restoring
-    ADDREST = np.zeros([NOVEL, NOHEAD, NOFREQ, NDOF, NDOF])  # Additional restoring
+    ADDREST = np.zeros([NOVEL, NOHEAD, NOFREQ, 6, 6])  # Additional restoring
+    # "Additional" matrices has the size (6x6) regardless if there is an air cushion or not.
 
     # Initialize viscous roll damping
     VISCDL = np.zeros([NOVEL, NOHEAD, NOFREQ])  # Viscous roll damping, linear part
@@ -67,27 +69,27 @@ def read_re7_file(filename):
             for k in range(NOFREQ):
                 FREQ[k] = float(f.readline())  # Should only contain one element
 
-                for m in range(NDOF):
+                for m in range(NDOF):  # NDOF = 7 if the air cushion is on and NDOF = 7 if the air cushion is off.
                     ADDMAS[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
-                for m in range(NDOF):
+                for m in range(6):
                     ADDADDMAS[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
-                for m in range(NDOF):
+                for m in range(NDOF):  # NDOF = 7 if the air cushion is on and NDOF = 7 if the air cushion is off.
                     DAMP[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
-                for m in range(NDOF):
+                for m in range(6):
                     ADDDAMP[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
-                for m in range(NDOF):
+                for m in range(NDOF):  # NDOF = 7 if the air cushion is on and NDOF = 7 if the air cushion is off.
                     REST[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
-                for m in range(NDOF):
+                for m in range(6):
                     ADDREST[i, j, k, m, :] = [float(i) for i in f.readline().split()]
 
                 # Read in viscous roll damping
                 VISCDL[i, j, k], VISCDN[i, j, k], VISCDNL[i, j, k] = [float(i) for i in f.readline().split()]
-    return VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN
+    return VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF
 
 
 def read_re8_file(filename):
