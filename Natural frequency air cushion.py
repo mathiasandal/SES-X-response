@@ -16,11 +16,8 @@ rho = 1025  # [kg/m^3] density of sea water
 p_a = 101325  # [Pa] atmospheric pressure
 g = 9.81  # [m/s^2] acceleration of gravity
 
-
 h = p_0/rho/g  # [m] Difference in water level inside and outside the air cushion
-
 h_b = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion i suppressed.
-
 A_b = L * b_c  # [m] Area of the air cushion
 
 volume_displacement = 2 * L * d * b_G  # [m^3] volume displacement without excess air cushion pressure

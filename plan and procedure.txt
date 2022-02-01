@@ -7,4 +7,4 @@ How to:
 
 Where?
 - In the file hydrodynamics conceptual SES.py the Veres hydrodynamic properties are imported from input.re7 files.
-  In the same script the same hydrodynamic properties are derived from the simplified SES geometry. 
+  In the same script the same hydrodynamic properties are derived from the simplified SES geometry.
