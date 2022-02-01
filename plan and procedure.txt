@@ -1,0 +1,10 @@
+Goal: compare and make sure that the simplified calculations give the same results as the ones in Veres.
+
+How to:
+- Establish the same hydrodynamics and air cushion properties as with the Veres model.
+- Use Veres results without air cushion, and add these terms in Python.
+- Make sure these match the results from Veres with the air cushion.
+
+Where?
+- In the file hydrodynamics conceptual SES.py the Veres hydrodynamic properties are imported from input.re7 files.
+  In the same script the same hydrodynamic properties are derived from the simplified SES geometry. 
