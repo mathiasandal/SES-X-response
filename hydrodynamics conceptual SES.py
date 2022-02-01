@@ -1,4 +1,5 @@
 from air_cushion import read_fan_characteristics, interpolate_fan_characteristics
+from veres import read_re7_file
 
 """
 This script compares calculations from Veres on a simplified SES geometry with rectangular side hulls. 
@@ -33,7 +34,8 @@ V_0 = A_wp * d  # [m^3] volume displaced by the side hulls at equilibrium
 
 # ------- Air cushion properties -------
 h = p_0/rho/g  # [m] Difference in water level inside and outside the air cushion
-h_b = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion i suppressed.
+h_b1 = h_hull + h - d  # [m] height of the air cushion after the water level inside the cushion i suppressed.
+h_b = h_hull - d  # [m] height of the air cushion before the water level inside the cushion i suppressed.
 A_b = L * b_c  # [m] Area of the air cushion
 x_B_c = 0  # [m] longitudinal position of the air cushion centroid relative to the L_pp/2 in front of AP
 V_c0 = A_b * h_b  # [m^3] Volume inside air cushion at equilibrium
@@ -82,7 +84,19 @@ C_37_c = -rho * g * h * A_b  # [N] coupling term in heave due to change in the a
 
 C_77_c = 0.5 * Q_0 - p_0 * dQdp_0  # [m^3/s] equivalent restoring term in mass continuity eq. for air inside air cushion
 
+C_44 = C_44_h + C_44_c  # [Nm] total restoring coefficient
+C_55 = C_55_h + C_55_c  # [Nm] total restoring coefficient
+
 # Damping
 B_73_c = A_b  # [m] equivalent damping coefficient in uniform pressure DOF due to velocity in heave.
 B_75_c = -A_b * x_B  # [m^2] equivalent damping coefficient in uniform pressure DOF due to velocity in pitch.
 B_77_c = p_0 * V_c0 / gamma / (p_0 + p_a)  # [m^3] equivalent damping coefficient in uniform pressure DOF.
+
+
+# ------- Comparison with Veres ------
+
+path_re7 = 'Input files/Conceptual SES/with air cushion/input.re7'
+
+VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
+
+print('hi')
