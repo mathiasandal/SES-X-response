@@ -8,3 +8,14 @@ How to:
 Where?
 - In the file hydrodynamics conceptual SES.py the Veres hydrodynamic properties are imported from input.re7 files.
   In the same script the same hydrodynamic properties are derived from the simplified SES geometry.
+
+Thoughts:
+- It seems like the restoring terms due to the side hulls are correct. There are some small round-off(?) error. This got
+  confirmed by checking Veres results without any air cushion.
+- The terms coupled with the uniform pressure DOF appears to be correct. It is also her some round-off(?) error here as
+  it is used different number of sample points in the fan characteristic curves.
+  The terms that agree well are: C_37_c, C_57_c, C_77_c, B_77_c, B_75_c and B_73_c
+- The terms that are not correct yet is the restoring in heave and pitch. It is believed this is because the python-code
+  does not take into account any terms due to the seal at the aft and front. The seals should contribute with restoring
+  both in heave and pitch. The VERES documentation should be studied and the calculation of these terms shall be
+  implemented to confirm if the difference is in fact due to this. 
