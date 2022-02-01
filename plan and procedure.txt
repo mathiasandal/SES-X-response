@@ -18,4 +18,4 @@ Thoughts:
 - The terms that are not correct yet is the restoring in heave and pitch. It is believed this is because the python-code
   does not take into account any terms due to the seal at the aft and front. The seals should contribute with restoring
   both in heave and pitch. The VERES documentation should be studied and the calculation of these terms shall be
-  implemented to confirm if the difference is in fact due to this. 
+  implemented to confirm if the difference is in fact due to this.
