@@ -7,7 +7,7 @@ B = 10  # [m] total beam of the vessel
 b_G = 0.5  # [m] beam of side hulls (gondolas)
 b_c = 7  # [m] beam of the air cushion/beam between the side hulls
 h_hull = 2  # [m] distance from bottom of side hull to roof of air cushion
-d = 0.5  # [m] draught without excess pressure in the air cushion
+d = 0.5  # [m] draught with excess pressure in the air cushion
 p_0 = 3500  # [Pa] excess pressure in the air cushion
 gamma = 1.4  # [-] Ratio of specific heat for air
 
