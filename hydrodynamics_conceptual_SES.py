@@ -81,7 +81,7 @@ x_lobe_bag_seal = -L / 2  # [m] Longitudinal position of the lobe bag seal relat
 x_finger_seal = L / 2  # [m] Longitudinal position of the finger seal relative to motion coord. system
 
 # Computes restoring coefficients
-c_33_seal, c_35_seal, c_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(b_seals, tau_b, tau_s, p_0, p_s,
+C_33_seal, C_35_seal, C_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(b_seals, tau_b, tau_s, p_0, p_s,
                                                                                 x_finger_seal, x_lobe_bag_seal)
 
 # ------- Hydrodynamic coefficients -------
@@ -98,8 +98,9 @@ C_37_c = -rho * g * h * A_b  # [N] coupling term in heave due to change in the a
 
 C_77_c = 0.5 * Q_0 - p_0 * dQdp_0  # [m^3/s] equivalent restoring term in mass continuity eq. for air inside air cushion
 
-C_44 = C_44_h + C_44_c  # [Nm] total restoring coefficient
-C_55 = C_55_h + C_55_c  # [Nm] total restoring coefficient
+C_33 = C_33_h + C_33_seal  # [N/m] total restoring coefficient in heave
+C_44 = C_44_h + C_44_c  # [Nm] total restoring coefficient in roll
+C_55 = C_55_h + C_55_c + C_55_seal  # [Nm] total restoring coefficient in pitch
 
 # Damping
 B_73_c = A_b  # [m] equivalent damping coefficient in uniform pressure DOF due to velocity in heave.
