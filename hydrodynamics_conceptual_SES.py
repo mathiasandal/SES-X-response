@@ -92,10 +92,12 @@ C_33_seal, C_35_seal, C_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(
 C_33_h = rho * g * A_wp  # [N/m] hydrostatic restoring coefficient in heave
 C_44_h = rho * g * V_0 * z_B + rho * g * I_x - M * g * z_G  # [Nm] hydrostatic restoring coefficient in roll
 C_55_h = rho * g * V_0 * z_B + rho * g * I_y - M * g * z_G  # [Nm] hydrostatic restoring coefficient in pitch
+C_53_h = -rho * g * A_wp * x_B  # [N] hydrostatic restoring coefficient in pitch due to heave motion
+C_35_h = C_53_h  # [m] hydrostatic restoring in heave due to pitch motion
 
 C_44_c = rho * g * h * A_b * z_c  # [Nm] restoring coefficient in roll due to the air cushion
 C_55_c = rho * g * h * A_b * z_c  # [Nm] restoring coefficient in pitch due to the air cushion
-C_57_c = -rho * g * h * A_b * x_B  # [Nm] coupling term in pitch due to change in the air cushion pressure
+C_57_c = -rho * g * h * A_b * x_c  # [Nm] coupling term in pitch due to change in the air cushion pressure
 C_37_c = -rho * g * h * A_b  # [N] coupling term in heave due to change in the air cushion pressure
 
 C_77_c = 0.5 * Q_0 - p_0 * dQdp_0  # [m^3/s] equivalent restoring term in mass continuity eq. for air inside air cushion
@@ -103,11 +105,31 @@ C_77_c = 0.5 * Q_0 - p_0 * dQdp_0  # [m^3/s] equivalent restoring term in mass c
 C_33 = C_33_h + C_33_seal  # [N/m] total restoring coefficient in heave
 C_44 = C_44_h + C_44_c  # [Nm] total restoring coefficient in roll
 C_55 = C_55_h + C_55_c + C_55_seal  # [Nm] total restoring coefficient in pitch
+C_35 = C_35_seal + C_35_h  # [N] total restoring coefficient in heave due to pitch motion
+C_53 = C_35_seal + C_53_h  # [N] Total restoring coefficient in pitch due to heave motion
 
 # Damping
 B_73_c = A_b  # [m] equivalent damping coefficient in uniform pressure DOF due to velocity in heave.
 B_75_c = -A_b * x_B  # [m^2] equivalent damping coefficient in uniform pressure DOF due to velocity in pitch.
 B_77_c = p_0 * V_c0 / gamma / (p_0 + p_a)  # [m^3] equivalent damping coefficient in uniform pressure DOF.
+
+# ------- Establish stiffness and damping matrix calculated in python -------
+C_python = np.array([[0,     0,     0,    0,    0,   0,      0],
+                     [0,     0,     0,    0,    0,   0,      0],
+                     [0,     0,  C_33,    0, C_35,   0, C_37_c],
+                     [0,     0,     0, C_44,    0,   0,      0],
+                     [0,     0,  C_53,    0, C_55,   0, C_57_c],
+                     [0,     0,     0,    0,    0,   0,      0],
+                     [0,     0,     0,    0,    0,   0, C_77_c]])
+
+B_python = np.array([[0,     0,      0,    0,      0,   0,      0],
+                     [0,     0,      0,    0,      0,   0,      0],
+                     [0,     0,      0,    0,      0,   0,      0],
+                     [0,     0,      0,    0,      0,   0,      0],
+                     [0,     0,      0,    0,      0,   0,      0],
+                     [0,     0,      0,    0,      0,   0,      0],
+                     [0,     0, B_73_c,    0, B_75_c,   0, B_77_c]])
+
 
 # ------- Comparison with Veres ------
 

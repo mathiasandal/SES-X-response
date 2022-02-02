@@ -26,3 +26,6 @@ Thoughts:
   exception of the C_57 term. This should be zero. In Veres the motion coordinate system located at 0.00002m in front
   of the Lpp/2 instead of exactly 0.0. Thus the term is calculated as C_57 = -7.9. Simple hand calculations show that it
   comes from the numerical uncertainty. Therefore this error is disregarded as it is due to round-off error.
+- For the damping terms the relative error for B_73 and B_77 is small, but for B_75 it is 1. This is for the same reason
+  as for the C_57 term. It should be zero, but as the coordinate system is not located at exactly Lpp/2 we get a nonzero
+  value.
