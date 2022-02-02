@@ -285,6 +285,26 @@ def wave_pumping_excitation(b, l_1, l_2, x_prime, beta, omegas, g=9.81):
     return f_ex_7
 
 
+def wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a=1, g=9.81):
+
+
+    k = omega ** 2 / g  # calculate wave number
+
+    if np.sin(np.deg2rad(beta)) == 0:
+        F_wp_amp = 1j * omega * zeta_a * (y_s - y_p) / k / np.cos(np.deg2rad(beta)) * \
+                   (np.exp(-1j * k * x_s * np.cos(np.deg2rad(beta))) - np.exp(-1j * k * x_f * np.cos(np.deg2rad(beta))))
+    elif np.cos(np.deg2rad(beta)) == 0:
+        F_wp_amp = 1j * omega * zeta_a * (x_s - x_f) / k / np.sin(np.deg2rad(beta)) * \
+                   (np.exp(-1j * k * y_s * np.sin(np.deg2rad(beta))) - np.exp(-1j * k * y_p * np.sin(np.deg2rad(beta))))
+    else:
+        F_wp_amp = omega * zeta_a / k**2 / np.sin(np.deg2rad(beta)) / np.cos(np.deg2rad(beta)) * \
+                   (- np.exp(-1j * k * (x_s * np.cos(np.deg2rad(beta)) + y_s * np.sin(np.deg2rad(beta))))
+                    + np.exp(-1j * k * (x_f * np.cos(np.deg2rad(beta)) + y_s * np.sin(np.deg2rad(beta))))
+                    + np.exp(-1j * k * (x_s * np.cos(np.deg2rad(beta)) + y_p * np.sin(np.deg2rad(beta))))
+                    - np.exp(-1j * k * (x_f * np.cos(np.deg2rad(beta)) + y_p * np.sin(np.deg2rad(beta)))))
+    return F_wp_amp
+
+
 if __name__ == "__main__":
 
     l_1 = 12  # [m] length of the rectangular part of the air cushion

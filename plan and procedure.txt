@@ -29,3 +29,5 @@ Thoughts:
 - For the damping terms the relative error for B_73 and B_77 is small, but for B_75 it is 1. This is for the same reason
   as for the C_57 term. It should be zero, but as the coordinate system is not located at exactly Lpp/2 we get a nonzero
   value.
+
+Checking how excitation from the seals are implemented, and how wave pumping is introduced.
