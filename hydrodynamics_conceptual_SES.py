@@ -1,6 +1,8 @@
 from air_cushion import read_fan_characteristics, interpolate_fan_characteristics
 from veres import read_re7_file
 from bow_and_stern_seals import restoring_finger_at_bow_lobe_bag_at_the_stern
+from Wave_response_utilities import add_row_and_column
+import numpy as np
 
 """
 This script compares calculations from Veres on a simplified SES geometry with rectangular side hulls. 
@@ -77,8 +79,8 @@ b_seals = b_c  # [m] Beam of the seals
 tau_b = 60  # [deg] angle of the bow finger seal
 tau_s = 30  # [deg] angle of the stern lobe bag seal
 p_s = 0  # [Pa] Membrane seal pressure
-x_lobe_bag_seal = -L / 2  # [m] Longitudinal position of the lobe bag seal relative to motion coord. system
-x_finger_seal = L / 2  # [m] Longitudinal position of the finger seal relative to motion coord. system
+x_lobe_bag_seal = L / 2  # [m] Longitudinal position of the lobe bag seal at the stern relative to motion coord. system
+x_finger_seal = -L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
 
 # Computes restoring coefficients
 C_33_seal, C_35_seal, C_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(b_seals, tau_b, tau_s, p_0, p_s,
@@ -109,8 +111,43 @@ B_77_c = p_0 * V_c0 / gamma / (p_0 + p_a)  # [m^3] equivalent damping coefficien
 
 # ------- Comparison with Veres ------
 
-path_re7 = 'Input files/Conceptual SES/with air cushion/input.re7'
+path_re7_air_cushion = 'Input files/Conceptual SES/with air cushion/input.re7'
+path_re7_no_air_cushion = 'Input files/Conceptual SES/without air cushion/input.re7'
 
-VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
+# Get Veres results with air cushion turned on
+M_veres_air_cushion, A_veres_air_cushion, B_veres_air_cushion, C_veres_air_cushion, VEL_a, HEAD_a, FREQ_a, XMTN_a, \
+    ZMTN_a, NDOF_a = read_re7_file(path_re7_air_cushion)
+
+# Get Veres results with air cushion turned off
+M_veres_no_air_cushion, A_veres_no_air_cushion, B_veres_no_air_cushion, C_veres_no_air_cushion, VEL_na, HEAD_na, \
+    FREQ_na, XMTN_na, ZMTN_na, NDOF_na = read_re7_file(path_re7_no_air_cushion)
+
+# Combine Veres without air cushion with air cushion terms
+
+# initialize stiffness matrix to be added air cushion terms and adds a row and a column such that it is a 7x7 matrix
+C_veres_plus_cushion = add_row_and_column(C_veres_no_air_cushion[0][0][0])
+
+# Add air cushion terms
+C_veres_plus_cushion[2, 2] += C_33_seal  # heave
+C_veres_plus_cushion[2, 4] += C_35_seal  # heave due to pitch
+C_veres_plus_cushion[4, 2] += C_35_seal  # pitch due to heave
+
+C_veres_plus_cushion[3, 3] += C_44_c  # roll
+C_veres_plus_cushion[4, 4] += C_55_c + C_55_seal  # pitch
+C_veres_plus_cushion[2, 6] += C_37_c  # heave due to uniform pressure
+C_veres_plus_cushion[4, 6] += C_57_c  # pitch due to uniform pressure
+C_veres_plus_cushion[6, 6] += C_77_c  # Uniform pressure DOF
+
+# computes relative errors
+C_rel_error = np.zeros([7, 7])  # initialize array
+
+C_rel_error[2, 2] = np.abs((C_veres_plus_cushion[2, 2] - C_veres_air_cushion[0][0][0][2][2])/C_veres_air_cushion[0][0][0][2][2])  # heave
+C_rel_error[2, 4] = np.abs((C_veres_plus_cushion[2, 4] - C_veres_air_cushion[0][0][0][2][4])/C_veres_air_cushion[0][0][0][2][4])  # heave due to pitch
+C_rel_error[4, 2] = np.abs((C_veres_plus_cushion[4, 2] - C_veres_air_cushion[0][0][0][4][2])/C_veres_air_cushion[0][0][0][4][2])  # pitch due to heave
+C_rel_error[3, 3] = np.abs((C_veres_plus_cushion[3, 3] - C_veres_air_cushion[0][0][0][3][3])/C_veres_air_cushion[0][0][0][3][3])  # roll
+C_rel_error[4, 4] = np.abs((C_veres_plus_cushion[4, 4] - C_veres_air_cushion[0][0][0][4][4])/C_veres_air_cushion[0][0][0][4][4])  # pitch
+C_rel_error[2, 6] = np.abs((C_veres_plus_cushion[2, 6] - C_veres_air_cushion[0][0][0][2][6])/C_veres_air_cushion[0][0][0][2][6])  # heave due to uniform pressure
+C_rel_error[4, 6] = np.abs((C_veres_plus_cushion[4, 6] - C_veres_air_cushion[0][0][0][4][6])/C_veres_air_cushion[0][0][0][4][6])  # pitch due to uniform pressure
+C_rel_error[6, 6] = np.abs((C_veres_plus_cushion[6, 6] - C_veres_air_cushion[0][0][0][6][6])/C_veres_air_cushion[0][0][0][6][6])  # uniform pressure DOF
 
 print('hi')
