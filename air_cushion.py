@@ -286,7 +286,27 @@ def wave_pumping_excitation(b, l_1, l_2, x_prime, beta, omegas, g=9.81):
 
 
 def wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a=1, g=9.81):
+    """
+    Computes complex amplitude of the wave pumping excitation for a rectangular air cushion.
 
+    :param x_f: (float)
+        Forward extent of the air cushion in meters. Relative to the motion coord. system
+    :param x_s: (float)
+        Aft extent of the air cushion in meters. Relative to the motion coord. system
+    :param y_p: (float)
+        Lateral extent of air cushion in port side in meters. Relative to motion coord. system
+    :param y_s: (float)
+        Lateral extent of air cushion in starboard side in meters. Relative to motion coord. system
+    :param omega: (float)
+        frequency of encounter in rad/s
+    :param beta: (float)
+        Wave heading in deg. Beta = 0 means head sea
+    :param zeta_a: (float)
+        Wave amplitude in meter
+    :param g: (float)
+    :return: (float)
+        Complex amplitude of the wave pumping exitation.
+    """
 
     k = omega ** 2 / g  # calculate wave number
 
