@@ -16,7 +16,7 @@ mean free surface.
 L = 20  # [m] length of the vessel
 B = 10  # [m] total beam of the vessel
 b_G = 0.5  # [m] beam of side hulls (gondolas)
-b_c = 7  # [m] beam of the air cushion/beam between the side hulls
+b_c = 7  # [m] beam of the air cushion/length between the side hulls
 h_hull = 2  # [m] distance from bottom of side hull to roof of air cushion
 d = 0.5  # [m] draught with excess pressure in the air cushion
 p_0 = 3500  # [Pa] excess pressure in the air cushion
@@ -72,7 +72,7 @@ y_B = 0  # [m] transverse position
 z_B = -d / 2  # [m] vertical position
 
 # ------- Bow and stern seals ------
-# The vessel has a finger seal at the bow and a lobe bag type of seal at the back
+# The vessel has a finger seal at the bow and a lobe bag type of seal at the stern
 
 # properties
 b_seals = b_c  # [m] Beam of the seals

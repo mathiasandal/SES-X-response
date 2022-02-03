@@ -304,8 +304,9 @@ def wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a=1, g=9.81):
     :param zeta_a: (float)
         Wave amplitude in meter
     :param g: (float)
+        Acceleration of gravity
     :return: (float)
-        Complex amplitude of the wave pumping exitation.
+        Complex amplitude of the wave pumping excitation.
     """
 
     k = omega ** 2 / g  # calculate wave number
