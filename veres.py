@@ -92,6 +92,8 @@ def read_re7_file(filename):
     return VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF
 
 
+# TODO: Create seperate function that works on 2D strip theory and change the name of this function to something with
+#  high-speed formulation
 def read_re8_file(filename):
     # TODO: Fix/add documentation
     """
