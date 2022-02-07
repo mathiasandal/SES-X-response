@@ -176,12 +176,12 @@ def excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_
 
     k = omega ** 2 / g  # calculate wave number
 
-    # excitation force amplitude in heave
-    f_3 = -1j * (p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
+    # excitation force amplitude in heave (Multiplied with 1j relative to the formula in the user's manual)
+    f_3 = (1j) * -1j * (p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
                  + p_s * b / np.sin(np.deg2rad(tau_s)) * np.exp(1j * k * x_s * np.cos(np.deg2rad(beta)))) * zeta_a
 
-    # excitation moment amplitude in pitch
-    f_5 = 1j * (x_b * p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
+    # excitation moment amplitude in pitch (Multiplied with 1j relative to the formula in the user's manual)
+    f_5 = (1j) * 1j * (x_b * p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
                 + x_s * p_s * b / np.sin(np.deg2rad(tau_s)) * np.exp(1j * k * x_s * np.cos(np.deg2rad(beta)))) * zeta_a
 
     return f_3, f_5

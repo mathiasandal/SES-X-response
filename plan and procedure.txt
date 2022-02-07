@@ -34,3 +34,7 @@ Checking how excitation from the seals are implemented, and how wave pumping is 
 - When comparing the complex amplitude of the excitation load in heave and pitch it seems like absolute value of the
   complex number is correct, but the phase is wrong. To a good accuracy I get -a+b*i, but should get -b+a*i. Thus need
   to look into the definitions of the coordinate systems etc.
+- It now appears that the definition of the position of the skirts is not the coordinate in the motion coordinate system
+  , but rather the absolute distance. When now multiplying the excitation in heave and pitch with the complex value 1j
+  the correct phase of the excitation is retrieved. This is a bit sketchy, but since the excitation from the skirts will
+  not play a crucial role in the hydrodynamic analysis of the SES-X vessel this will be good enough for now.
