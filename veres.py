@@ -117,7 +117,6 @@ def read_re8_file(filename):
     # Read in number of velocities, headings, frequencies and degrees of freedom
     NOVEL, NOHEAD, NOFREQ, NDOF = [int(i) for i in f.readline().split()]
 
-
     # Initialize vectors to contain velocities, headings and frequencies
     VEL = np.zeros(NOVEL)  # [m/s] Velocity of the vessel
     HEAD = np.zeros(NOHEAD)  # [deg] Wave heading
@@ -130,9 +129,17 @@ def read_re8_file(filename):
     ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the mo􀆟on coordinate system (relative to BL)
 
     # Initialize Force components
-    # Real parts
-    REFORCE = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Real part
-    IMFORCE = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Imaginary part
+    # For High-Speed formulation only the total excitation force is given
+    REFORCE = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Real part of excitation load
+    IMFORCE = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Imaginary part of excitation load
+
+    # For conventional strip theory the Froude-Krylov and diffraction loads are also stored separately
+    REFORCE_FK = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Real part of Froude-Krylov part of excitation load
+    IMFORCE_FK = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Imaginary part of Froude-Krylov part of excitation load
+    REFORCE_D1 = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Real part of diffraction load
+    IMFORCE_D1 = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Imaginary part of diffraction load
+    REFORCE_D2 = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Real part of diffraction load without speed terms
+    IMFORCE_D2 = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])  # Imaginary part of diffraction load without speed terms
 
     for i in range(NOVEL):
         VEL[i], SINK[i], TRIM[i], XMTN[i], ZMTN[i] = [float(m) for m in f.readline().split()]
@@ -141,8 +148,22 @@ def read_re8_file(filename):
             for k in range(NOFREQ):
                 FREQ[k] = float(f.readline())  # Should only contain one element
 
-                for m in range(NDOF):
-                    REFORCE[m, k, j, i], IMFORCE[m, k, j, i] = [float(m) for m in f.readline().split()][1:]
+                temp = [float(m) for m in f.readline().split()][1:]
+
+                if len(temp) == 2:
+                    REFORCE[0, k, j, i], IMFORCE[0, k, j, i] = temp
+                elif len(temp) == 8:
+                    REFORCE[0, k, j, i], IMFORCE[0, k, j, i], REFORCE_FK[0, k, j, i], IMFORCE_FK[0, k, j, i], \
+                    REFORCE_D1[0, k, j, i], IMFORCE_D1[0, k, j, i], REFORCE_D2[0, k, j, i], IMFORCE_D2[0, k, j, i] = \
+                        temp
+
+                for m in range(1, NDOF):
+                    if len(temp) == 2:
+                        REFORCE[m, k, j, i], IMFORCE[m, k, j, i] = [float(m) for m in f.readline().split()][1:]
+                    elif len(temp) == 8:
+                        REFORCE[m, k, j, i], IMFORCE[m, k, j, i], REFORCE_FK[m, k, j, i], IMFORCE_FK[m, k, j, i], \
+                        REFORCE_D1[m, k, j, i], IMFORCE_D1[m, k, j, i], REFORCE_D2[m, k, j, i], IMFORCE_D2[m, k, j, i] = \
+                            [float(m) for m in f.readline().split()][1:]
 
     return REFORCE, IMFORCE, VEL, HEAD, FREQ, XMTN, ZMTN
 
@@ -206,22 +227,23 @@ def interpolate_matrices(omega, omega_lower, omega_upper, mat_lower, mat_upper):
         raise ValueError
 
     # interpolate
-    mat = mat_lower + (omega - omega_lower)/(omega_upper - omega_lower)*(mat_upper - mat_lower)
+    mat = mat_lower + (omega - omega_lower) / (omega_upper - omega_lower) * (mat_upper - mat_lower)
 
     return mat
 
 
-def compute_RAOs(velocity, heading, wave_frequencies, M, A, B_c, B_h, C, F_ex_real, F_ex_imag, f_ex_7, force_combination=1, g=9.81):
-
+def compute_RAOs(velocity, heading, wave_frequencies, M, A, B_c, B_h, C, F_ex_real, F_ex_imag, f_ex_7,
+                 force_combination=1, g=9.81):
     # TODO: Add documentation
 
     n = len(wave_frequencies)
 
-    encounter_frequencies = wave_frequencies + velocity / g * np.cos(np.deg2rad(heading)) * np.power(wave_frequencies, 2)
+    encounter_frequencies = wave_frequencies + velocity / g * np.cos(np.deg2rad(heading)) * np.power(wave_frequencies,
+                                                                                                     2)
 
     rao = np.zeros([7, n], dtype=complex)
 
-    #force_combination = 2  # 1: Hydro, 2: Wave pumping, 3: both
+    # force_combination = 2  # 1: Hydro, 2: Wave pumping, 3: both
 
     for i in range(n):
         A_temp = add_row_and_column(A[0, 0, i, :, :])
@@ -241,33 +263,34 @@ def compute_RAOs(velocity, heading, wave_frequencies, M, A, B_c, B_h, C, F_ex_re
             F_ex_imag_temp = np.r_[F_ex_imag[:, i, 0, 0], np.array([f_ex_7[i].imag])]
 
         # Solves linear system of equations
-        rao[:, i] = np.linalg.solve(-encounter_frequencies[i] ** 2 * (M + A_temp) + 1j * encounter_frequencies[i] * B_temp + C, F_ex_real_temp + F_ex_imag_temp*1j)
+        rao[:, i] = np.linalg.solve(
+            -encounter_frequencies[i] ** 2 * (M + A_temp) + 1j * encounter_frequencies[i] * B_temp + C,
+            F_ex_real_temp + F_ex_imag_temp * 1j)
 
     return encounter_frequencies, rao
 
 
 def print_natfrequencies_and_eigenmodes(nat_frequencies, eigen_modes, type="radians_per_sec"):
-
     decimal_precision = 2
     keep_complex = True
 
     if type == 'periods':
         for i in range(len(nat_frequencies)):
-            if nat_frequencies[i] == 0  or nat_frequencies[i] < 1e-6:
+            if nat_frequencies[i] == 0 or nat_frequencies[i] < 1e-6:
                 nat_frequencies[i] = float('inf')
             elif nat_frequencies[i] == float('inf'):
                 nat_frequencies[i] = 0
             else:
-                nat_frequencies[i] = 2*np.pi/nat_frequencies[i]
+                nat_frequencies[i] = 2 * np.pi / nat_frequencies[i]
     elif type == 'Hz':
         for i in range(len(nat_frequencies)):
-            nat_frequencies[i] = nat_frequencies[i]/2/np.pi
+            nat_frequencies[i] = nat_frequencies[i] / 2 / np.pi
 
     # create list containing eigenmodes DOFs
     vertical_list = []
     horizontal_list = []
     for i in range(len(nat_frequencies)):
-        vertical_list.append('eta_' + str(i+1))
+        vertical_list.append('eta_' + str(i + 1))
 
         if type == 'periods':
             horizontal_list.append(str(round(nat_frequencies[i], decimal_precision)) + ' [s]')
@@ -282,17 +305,17 @@ def print_natfrequencies_and_eigenmodes(nat_frequencies, eigen_modes, type="radi
 
     return df
 
-def uncoupled_natural_frequency(encounter_frequency, M, C, A, tol=10-8):
 
+def uncoupled_natural_frequency(encounter_frequency, M, C, A, tol=10 - 8):
     n = len(encounter_frequency)
 
-    omega_temp = encounter_frequency[n//2]
+    omega_temp = encounter_frequency[n // 2]
 
     A_temp = np.interp(omega_temp, encounter_frequency, A)
 
-    nat_frequency = np.sqrt(C/(M + A_temp))
+    nat_frequency = np.sqrt(C / (M + A_temp))
 
-    err = (nat_frequency - omega_temp)/omega_temp  # computes relative error
+    err = (nat_frequency - omega_temp) / omega_temp  # computes relative error
 
     counter = 1  # initialize counter
 
