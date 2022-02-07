@@ -185,3 +185,47 @@ def excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_
                 + x_s * p_s * b / np.sin(np.deg2rad(tau_s)) * np.exp(1j * k * x_s * np.cos(np.deg2rad(beta)))) * zeta_a
 
     return f_3, f_5
+
+
+def excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=1, g=9.81):
+    """
+    Computes a list of complex excitation amplitudes for a SES with finger seals at the bow and lobe bag at the aft
+    corresponding to the given list of input encounter frequencies. The function is implemented according to the
+    formulas presented in the Veres SES extension p. 24
+
+    :param b: (float)
+        Beam of the seals in m. It is assumed that both seals have the same beam.
+    :param tau_b: (float)
+        Angle of the finger seal in deg
+    :param tau_s: (float)
+        Angle of the lobe bag seal in deg
+    :param p_0: (float)
+        Excess pressure in the air cushion in Pa
+    :param p_s: (float)
+        Excess pressure in the lobe bag in Pa
+    :param x_b: (float)
+        Longitudinal position of the finger seal relative to motion coord. system
+    :param x_s: (float)
+        Longitudinal position of the lobe bag type of seal relative to motion coord. system
+    :param omegas: (float) (n_frequencies X 1) numpy array
+        list of frequencies of encounter in rad/s
+    :param beta: (float)
+        Wave heading in deg. Beta = 0 means head sea
+    :param zeta_a: (float)
+        Wave amplitude in meter
+    :param g: (float)
+        Acceleration of gravity
+    :return: (float) (n_frequencies X 1) numpy array, (float) (n_frequencies X 1) numpy array
+        Complex amplitude of heave excitation, complex amplitude of pitch excitation
+    """
+
+    n_frequencies = len(omegas)  # number of frequencies in the input list of encounter frequencies
+
+    # initialize lists to contain excitation force in heave an excitation moment in pitch for different frequencies
+    f_3_seals = np.zeros([n_frequencies])
+    f_5_seals = np.zeros([n_frequencies])
+
+    for i in range(n_frequencies):
+        f_3_seals[i], f_5_seals[i] = excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas[i], beta, zeta_a, g)
+
+    return f_3_seals, f_5_seals
