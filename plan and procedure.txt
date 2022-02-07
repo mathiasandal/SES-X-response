@@ -31,3 +31,6 @@ Thoughts:
   value.
 
 Checking how excitation from the seals are implemented, and how wave pumping is introduced.
+- When comparing the complex amplitude of the excitation load in heave and pitch it seems like absolute value of the
+  complex number is correct, but the phase is wrong. To a good accuracy I get -a+b*i, but should get -b+a*i. Thus need
+  to look into the definitions of the coordinate systems etc.

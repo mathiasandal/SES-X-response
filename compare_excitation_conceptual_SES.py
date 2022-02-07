@@ -1,3 +1,4 @@
+import numpy as np
 from veres import read_re8_file
 from bow_and_stern_seals import excitation_skirts
 
@@ -35,7 +36,33 @@ REFORCE_a, IMFORCE_a, VEL_a, HEAD_a, FREQ_a, XMTN_a, ZMTN_a = read_re8_file(path
 # excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=1, g=9.81):
 f_3_skirts, f_5_skirts = excitation_skirts(b_seals, tau_b, tau_s, p_0, p_s, x_finger_seal, x_lobe_bag_seal, FREQ_na, HEAD_na[0])
 
-print(REFORCE_na[:][0][0][0])
 
+# Append excitation loads due to skirts into the excitation terms without any excitation loads due to the skirts.
 
+n_frequencies = len(FREQ_na)
 
+# Initialize arrays to hold the force components
+f_ex_re_without_air = np.zeros([n_frequencies, 6])
+f_ex_im_without_air = np.zeros([n_frequencies, 6])
+f_ex_re_with_air = np.zeros([n_frequencies, 6])
+f_ex_im_with_air = np.zeros([n_frequencies, 6])
+
+# Copy values from input files with and without an air cushion present
+for i in range(n_frequencies):
+    for j in range(6):
+        f_ex_re_without_air[i, j] = REFORCE_na[j, i, 0, 0]
+        f_ex_im_without_air[i, j] = IMFORCE_na[j, i, 0, 0]
+        f_ex_re_with_air[i, j] = REFORCE_a[j, i, 0, 0]
+        f_ex_im_with_air[i, j] = IMFORCE_a[j, i, 0, 0]
+
+f_ex_with_air = f_ex_re_with_air + 1j * f_ex_im_with_air
+f_ex_without_air = f_ex_re_without_air + 1j * f_ex_im_without_air
+
+# Append excitation from skirts
+for i in range(n_frequencies):
+    f_ex_re_without_air[i, 2] += f_3_skirts[i].real
+    f_ex_re_without_air[i, 4] += f_5_skirts[i].real
+    f_ex_im_without_air[i, 2] += f_3_skirts[i].imag
+    f_ex_im_without_air[i, 4] += f_5_skirts[i].imag
+
+print(f_ex_re_without_air)
