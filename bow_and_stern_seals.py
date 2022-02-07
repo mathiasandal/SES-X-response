@@ -222,8 +222,8 @@ def excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=
     n_frequencies = len(omegas)  # number of frequencies in the input list of encounter frequencies
 
     # initialize lists to contain excitation force in heave an excitation moment in pitch for different frequencies
-    f_3_seals = np.zeros([n_frequencies], dtype=complex)
-    f_5_seals = np.zeros([n_frequencies], dtype=complex)
+    f_3_seals = np.zeros([n_frequencies, 1], dtype=complex)
+    f_5_seals = np.zeros([n_frequencies, 1], dtype=complex)
 
     for i in range(n_frequencies):
         f_3_seals[i], f_5_seals[i] = excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas[i], beta, zeta_a, g)
