@@ -1,4 +1,5 @@
 from veres import read_re8_file
+from bow_and_stern_seals import excitation_skirts
 
 """
 This script compares excitation forces from Veres on a simplified SES geometry with rectangular side hulls. 
@@ -18,7 +19,7 @@ tau_s = 30  # [deg] angle of the stern lobe bag seal
 p_s = 0  # [Pa] Membrane seal pressure
 x_lobe_bag_seal = L / 2  # [m] Longitudinal position of the lobe bag seal at the stern relative to motion coord. system
 x_finger_seal = -L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
-
+p_0 = 3500  # [Pa] excess pressure in the air cushion
 
 # ------- Comparison with Veres ------
 
@@ -28,7 +29,13 @@ path_re8_no_air_cushion = 'Input files/Conceptual SES/without air cushion/input.
 REFORCE_na, IMFORCE_na, VEL_na, HEAD_na, FREQ_na, XMTN_na, ZMTN_na = read_re8_file(path_re8_no_air_cushion)
 REFORCE_a, IMFORCE_a, VEL_a, HEAD_a, FREQ_a, XMTN_a, ZMTN_a = read_re8_file(path_re8_air_cushion)
 
-print('hi')
+
+# compute excitation loads on skirts
+
+# excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=1, g=9.81):
+f_3_skirts, f_5_skirts = excitation_skirts(b_seals, tau_b, tau_s, p_0, p_s, x_finger_seal, x_lobe_bag_seal, FREQ_na, HEAD_na[0])
+
+print(REFORCE_na[:][0][0][0])
 
 
 
