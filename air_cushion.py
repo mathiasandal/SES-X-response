@@ -326,6 +326,43 @@ def wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a=1, g=9.81):
     return F_wp_amp
 
 
+def wave_pumping_rect(x_f, x_s, y_p, y_s, omegas, beta, zeta_a=1, g=9.81):
+    """
+    Computes complex amplitude of the wave pumping excitation for a rectangular air cushion for a list of encounter
+    frequencies.
+
+    :param x_f: (float)
+        Forward extent of the air cushion in meters. Relative to the motion coord. system
+    :param x_s: (float)
+        Aft extent of the air cushion in meters. Relative to the motion coord. system
+    :param y_p: (float)
+        Lateral extent of air cushion in port side in meters. Relative to motion coord. system
+    :param y_s: (float)
+        Lateral extent of air cushion in starboard side in meters. Relative to motion coord. system
+    :param omegas: (float)
+        frequency of encounter in rad/s
+    :param beta: (float)
+        Wave heading in deg. Beta = 0 means head sea
+    :param zeta_a: (float)
+        Wave amplitude in meter
+    :param g: (float)
+        Acceleration of gravity
+    :return: (float)
+        Complex amplitude of the wave pumping excitation.
+    """
+
+    n = len(omegas)  # length of list of omegas
+
+    # initialize f_ex_7
+    f_ex_7 = np.zeros([n], dtype=complex)
+
+    # calculate one complex force amplitude per omega
+    for i in range(n):
+        f_ex_7[i] = wave_pumping_rectangle(x_f, x_s, y_p, y_s, omegas[i], beta, zeta_a, g)
+
+    return f_ex_7
+
+
 if __name__ == "__main__":
 
     l_1 = 12  # [m] length of the rectangular part of the air cushion
