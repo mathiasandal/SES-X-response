@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 from veres import read_re8_file
 from bow_and_stern_seals import excitation_skirts
+from air_cushion import wave_pumping_rect
 
 """
 This script compares excitation forces from Veres on a simplified SES geometry with rectangular side hulls. 
@@ -14,6 +16,7 @@ mean free surface.
 
 # properties
 L = 20  # [m] length of the vessel
+b = 7  # [m] beam of air cushion
 b_seals = 7  # [m] Beam of the seals
 tau_b = 60  # [deg] angle of the bow finger seal
 tau_s = 30  # [deg] angle of the stern lobe bag seal
@@ -59,11 +62,22 @@ f_ex_with_air = f_ex_re_with_air + 1j * f_ex_im_with_air
 f_ex_without_air = f_ex_re_without_air + 1j * f_ex_im_without_air
 
 # Append excitation from skirts
+
+f_3_python = np.zeros([n_frequencies, 1], dtype=complex)
+f_5_python = np.zeros([n_frequencies, 1], dtype=complex)
+
 for i in range(n_frequencies):
+    f_3_python[i] = f_ex_re_without_air[i, 2] + 1j * f_ex_im_without_air[i, 2] + f_3_skirts[i, 0]
+
+    f_5_python[i] = f_ex_re_without_air[i, 4] + 1j * f_ex_im_without_air[i, 4] + f_5_skirts[i, 0]
+
+    '''
     f_ex_re_without_air[i, 2] += f_3_skirts[i].real
-    f_ex_re_without_air[i, 4] += f_5_skirts[i].real
     f_ex_im_without_air[i, 2] += f_3_skirts[i].imag
+    
+    f_ex_re_without_air[i, 4] += f_5_skirts[i].real
     f_ex_im_without_air[i, 4] += f_5_skirts[i].imag
+    '''
 
 print('Values from Python calculation:')
 print('Absolute value: ', np.abs(f_3_skirts[-1][0]))
@@ -74,3 +88,32 @@ print('Absolute value: ', np.abs(f_ex_with_air[-1][2]))
 print('Phase', np.rad2deg(np.angle(f_ex_with_air[-1][2])))
 print()
 print('Relative error: ', 100*np.abs((np.abs(f_3_skirts[-1][0]) - np.abs(f_ex_with_air[-1][2])) / np.abs(f_ex_with_air[-1][2])), '%')
+
+print(f_3_python[:, 0])
+print()
+print(f_5_python[:, 0])
+print()
+print(f_ex_with_air[:, 2])
+print()
+print(f_ex_with_air[:, 4])
+
+
+dat = np.array([f_ex_with_air[:, 2], f_3_python[:, 0], f_ex_with_air[:, 4], f_5_python[:, 0]]).transpose()
+
+print(dat)
+
+df = pd.DataFrame(dat, index=FREQ_a, columns=['f_3_veres', 'f_3_python', 'f_5_veres', 'f_5_python'])
+
+# Compute relative errors between Veres and Python calculations.
+df['f_3_rel_err'] = np.abs((df['f_3_veres'] - df['f_3_python']) / df['f_3_veres'])
+df['f_5_rel_err'] = np.abs((df['f_5_veres'] - df['f_5_python']) / df['f_5_veres'])
+
+
+# Compute wave pumping excitation
+f_ex_7 = wave_pumping_rect(L/2, L/2, b/2, b/2, FREQ_a, HEAD_a[0])
+
+a = f_ex_with_air.transpose()
+
+f_ex = np.vstack([f_ex_with_air.transpose(), f_ex_7])
+
+print(df)
