@@ -38,3 +38,5 @@ Checking how excitation from the seals are implemented, and how wave pumping is 
   , but rather the absolute distance. When now multiplying the excitation in heave and pitch with the complex value 1j
   the correct phase of the excitation is retrieved. This is a bit sketchy, but since the excitation from the skirts will
   not play a crucial role in the hydrodynamic analysis of the SES-X vessel this will be good enough for now.
+- Noticed that the pitching moment due to the air skirts was not correct, but had the wrong sign. Therefore it was just
+  multiplied with -1 to get the correct value. Again a bit sketchy, but it is not a vital part of the program.
