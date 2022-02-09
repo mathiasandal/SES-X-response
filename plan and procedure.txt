@@ -40,3 +40,7 @@ Checking how excitation from the seals are implemented, and how wave pumping is 
   not play a crucial role in the hydrodynamic analysis of the SES-X vessel this will be good enough for now.
 - Noticed that the pitching moment due to the air skirts was not correct, but had the wrong sign. Therefore it was just
   multiplied with -1 to get the correct value. Again a bit sketchy, but it is not a vital part of the program.
+
+Computing RAOs after checking that hydrodynamic coefficients and loads are correct
+- Did not get the correct values. The values are not exactly equal to the ones from the Excel sheet post-processor
+- Tried to compute the natural frequencies for an arbitrary wave frequency with its corresponding added mass matrix.

@@ -1,8 +1,9 @@
-from veres import read_re8_file, read_re7_file
+from veres import read_re8_file, read_re7_file, iterate_natural_frequencies, print_natfrequencies_and_eigenmodes
 from air_cushion import wave_pumping_rect
 from Wave_response_utilities import solve_eq_motion_steady_state, add_row_and_column
 import numpy as np
 import pandas as pd
+import scipy.linalg as la
 import matplotlib.pyplot as plt
 
 
@@ -12,13 +13,13 @@ path_re7 = path + 'input.re7'
 path_re8 = path + 'input.re8'
 
 # Read input.re7 file to get hydrodynamic coefficients
-M, A, B, C, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_re7_file(path_re7)
+M, A_n, B_n, C_n, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_re7_file(path_re7)
 
 # Clean up matrices
 M = add_row_and_column(M)
-A = A[0, 0, :, :, :]
-B = B[0, 0, :, :, :]
-C = C[0, 0, :, :, :]
+A = A_n[0, 0, :, :, :]
+B = B_n[0, 0, :, :, :]
+C = C_n[0, 0, :, :, :]
 omegas = FREQ_re7
 
 # Read input.re8 file to get excitation
@@ -65,16 +66,31 @@ df = pd.DataFrame(dat, index=omegas, columns=['eta_1 mag', 'eta_1 phase', 'eta_2
                                               'eta_7 mag', 'eta_7 phase'])
 
 
+# Compute and compare heave accelerations
+
+
 # Plot RAOs
 
-plt.plot(omegas, raos_magnitude[:, 2])
-plt.xlabel('encounter frequency [rad/s]')
-plt.ylabel('$\eta_{3}/\zeta_a$')
-plt.title('RAO in heave')
-plt.show()
+plot_raos = True
 
-plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]))
-plt.xlabel('encounter frequency [rad/s]')
-plt.ylabel('$|\omega^2\eta_{3}|/\zeta_a[s^{-2}]$')
-plt.title('RAO for acceleration in heave')
-plt.show()
+if plot_raos:
+    plt.plot(omegas, raos_magnitude[:, 2])
+    plt.xlabel('encounter frequency [rad/s]')
+    plt.ylabel('$\\eta_{3}/\\zeta_a$')
+    plt.title('RAO in heave')
+    plt.show()
+
+    plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]))
+    plt.xlabel('encounter frequency [rad/s]')
+    plt.ylabel('$|\\omega^2\\eta_{3}|/\\zeta_a[s^{-2}]$')
+    plt.title('RAO for acceleration in heave')
+    plt.show()
+
+    plt.plot(omegas, raos_magnitude[:, 6])
+    plt.xlabel('encounter frequency [rad/s]')
+    plt.ylabel('$\\eta_{7}$')
+    plt.title('RAO in uniform pressure')
+    plt.show()
+
+
+print('KUK')
