@@ -1,7 +1,8 @@
 import numpy as np
 import scipy.linalg as la
 import pandas as pd
-from Wave_response_utilities import add_row_and_column
+from air_cushion import find_closest_value
+from Wave_response_utilities import add_row_and_column, decouple_matrix
 
 '''Contains all functions related to things retrieved from VERES'''
 
@@ -166,6 +167,115 @@ def read_re8_file(filename):
                             [float(m) for m in f.readline().split()][1:]
 
     return REFORCE, IMFORCE, VEL, HEAD, FREQ, XMTN, ZMTN
+
+
+def iterate_natural_frequencies(wave_frequencies, velocity, heading, added_mass, mass, restoring, g=9.81, tolerance=1e-5):
+
+    """
+    Iterates to the correct natural undamped natural frequencies of a system with n degrees of freedom for a SES-X vessel.
+
+    :param wave_frequencies:
+    :param velocity:
+    :param heading:
+    :param added_mass: (NVEL x NHEAD x NFREQ x 6 x 6) Matrix
+        Added mass of from the hull calculated using VERES.
+    :param mass: (7x7) or (3x3) matrix
+        if (7x7)
+            contains mass properties of all 7dof, i.e. surge, sway, heave, roll, pitch, yaw and uniform cushion pressure
+        if (3x3)
+            contains mass properties of three degrees of freedom. Heave, pitch and uniform cushion pressure.
+    :param restoring: (3x3) matrix
+        if (3x3)
+            contains restoring properties of three degrees of freedom. Heave, pitch and uniform cushion pressure.
+    :param g: double
+        accelerations of gravity
+    :param tolerance:
+
+    :return:
+    """
+
+    n = len(wave_frequencies)
+    m = len(restoring)
+
+    nat_frequencies = np.ones([m], dtype=complex)
+    eigen_modes = np.zeros([m, m], dtype=complex)
+
+    # calculates encounter frequency corresponding to each wave frequency and the vessel velocity and wave heading
+    encounter_frequencies = wave_frequencies + velocity / g * np.cos(np.deg2rad(heading)) * np.power(wave_frequencies, 2)
+
+    for i in range(m):
+        counter = 0  # initialize
+        omega_real = 0  # initialize
+        index_frequency_upper = int(np.ceil(n/2))
+        index_frequency_lower = index_frequency_upper - 1
+        err = -1.
+
+        # Get correct size of
+
+        while (counter <= 100 and err >= tolerance) or err == -1:
+            # Create matrices for the current encounter frequency
+            '''
+            M = decouple_matrix(mass, [2, 4, 6])
+            A = decouple_matrix(add_row_and_column(added_mass[0, 0, index_frequency, :, :]), [2, 4, 6])
+            C = decouple_matrix(restoring, [2, 4, 6])
+            '''
+            M = mass
+
+            if m == 3:
+                if err == -1.:
+                    A = decouple_matrix(add_row_and_column(added_mass[0, 0, index_frequency_upper, :, :]), [2, 4, 6])
+                else:
+                    A_l = decouple_matrix(add_row_and_column(added_mass[0, 0, index_frequency_lower, :, :]), [2, 4, 6])
+                    A_u = decouple_matrix(add_row_and_column(added_mass[0, 0, index_frequency_upper, :, :]), [2, 4, 6])
+                    A = interpolate_matrices(omega_real, encounter_frequencies[index_frequency_lower], encounter_frequencies[index_frequency_upper], A_l, A_u)
+
+            else:
+                if err == -1.:
+                    A = add_row_and_column(added_mass[0, 0, index_frequency_upper, :, :])
+                else:
+                    A_l = add_row_and_column(added_mass[0, 0, index_frequency_lower, :, :])
+                    A_u = add_row_and_column(added_mass[0, 0, index_frequency_upper, :, :])
+                    A = interpolate_matrices(omega_real, encounter_frequencies[index_frequency_lower], encounter_frequencies[index_frequency_upper], A_l, A_u)
+
+            C = restoring
+
+            nat_freq_temp, eigen_modes_temp = la.eig(C, M + A)
+
+            '''
+            if nat_freq_temp[i].real <= 0:
+                raise ValueError
+            '''
+
+            omega_real = np.sqrt(nat_freq_temp[i].real**2 + nat_freq_temp[i].imag**2)
+
+            # Finds next guess
+            dummy_omega, index_frequency = find_closest_value(encounter_frequencies, omega_real)
+
+            if dummy_omega < omega_real:
+                index_frequency_lower = index_frequency
+                index_frequency_upper = index_frequency + 1
+            elif dummy_omega > omega_real:
+                index_frequency_lower = index_frequency - 1
+                index_frequency_upper = index_frequency
+
+            # Computes relative error
+            err = abs((np.sqrt(nat_frequencies[i].real**2 + nat_frequencies[i].imag**2) - omega_real) /
+                      np.sqrt(nat_frequencies[i].real**2 + nat_frequencies[i].imag**2))
+
+            # err = abs((encounter_frequencies[index_frequency] - omega_real)/encounter_frequencies[index_frequency])
+
+            # Assigns new natural frequency to array
+            nat_frequencies[i] = nat_freq_temp[i]
+            eigen_modes[i, :] = eigen_modes_temp[i, :]
+
+            if omega_real == float('inf'):  # infinite frequency
+                break  # Breaks if the natural frequency has gone to infinity
+            elif index_frequency_lower < 0:
+                break  # Breaks if natural frequency goes to zero
+
+            counter += 1  # increment counter
+
+    return nat_frequencies, eigen_modes, encounter_frequencies
 
 
 def read_veres_input(path):
