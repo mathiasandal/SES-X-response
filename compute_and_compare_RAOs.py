@@ -93,4 +93,4 @@ if plot_raos:
     plt.show()
 
 
-print('KUK')
+print('1')
