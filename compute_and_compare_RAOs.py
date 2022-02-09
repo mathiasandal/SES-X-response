@@ -74,19 +74,19 @@ df = pd.DataFrame(dat, index=omegas, columns=['eta_1 mag', 'eta_1 phase', 'eta_2
 plot_raos = True
 
 if plot_raos:
-    plt.plot(omegas, raos_magnitude[:, 2])
+    plt.plot(omegas, raos_magnitude[:, 2], '-x')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$\\eta_{3}/\\zeta_a$')
     plt.title('RAO in heave')
     plt.show()
 
-    plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]))
+    plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]), '-x')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$|\\omega^2\\eta_{3}|/\\zeta_a[s^{-2}]$')
     plt.title('RAO for acceleration in heave')
     plt.show()
 
-    plt.plot(omegas, raos_magnitude[:, 6])
+    plt.plot(omegas, raos_magnitude[:, 6], '-x')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$\\eta_{7}$')
     plt.title('RAO in uniform pressure')
