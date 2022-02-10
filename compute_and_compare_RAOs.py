@@ -49,7 +49,8 @@ f_ex[6, :] = f_ex_7  # add the wave pumping to the force vectors
 # Compute and store complex response amplitudes
 
 for i in range(n_frequencies):
-    raos[:, i] = solve_eq_motion_steady_state(M + A[i, :, :], B[i, :, :], C[i, :, :], f_ex[:, i], omegas[i])
+    raos[:, i] = la.solve(-omegas[i]**2 * (M + A[i, :, :]) + 1j * omegas[i] * B[i, :, :] + C[i, :, :], f_ex[:, i])
+    # raos[:, i] = solve_eq_motion_steady_state(M + A[i, :, :], B[i, :, :], C[i, :, :], f_ex[:, i], omegas[i])
 
 raos_magnitude = np.transpose(np.abs(raos))  # store the magnitude of the complex response amplitude
 raos_phase = np.transpose(np.rad2deg(np.angle(raos)))  # store the phase of the complex response amplitude
@@ -65,6 +66,10 @@ df = pd.DataFrame(dat, index=omegas, columns=['eta_1 mag', 'eta_1 phase', 'eta_2
                                               'eta_5 mag', 'eta_5 phase', 'eta_6 mag', 'eta_6 phase',
                                               'eta_7 mag', 'eta_7 phase'])
 
+# Compute natural frequencies and eigenmodes
+nat_frequencies, eigen_modes = la.eig(C[40, :, :], M + A[40, :, :])
+
+df_nat = print_natfrequencies_and_eigenmodes(np.power(nat_frequencies, 0.5), eigen_modes)
 
 # Compute and compare heave accelerations
 
