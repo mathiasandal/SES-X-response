@@ -44,3 +44,8 @@ Checking how excitation from the seals are implemented, and how wave pumping is 
 Computing RAOs after checking that hydrodynamic coefficients and loads are correct
 - Did not get the correct values. The values are not exactly equal to the ones from the Excel sheet post-processor
 - Tried to compute the natural frequencies for an arbitrary wave frequency with its corresponding added mass matrix.
+
+Things I need to do:
+- Make sure the wave pumping in the rectangular air cushion is correctly implemented
+- Figure out why the excitation on the skirts does not give the correct value.
+    - When this is done I need to see it the RAO is the same as the one computed with Veres only.
