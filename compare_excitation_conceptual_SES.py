@@ -22,7 +22,7 @@ tau_b = 60  # [deg] angle of the bow finger seal
 tau_s = 30  # [deg] angle of the stern lobe bag seal
 p_s = 0  # [Pa] Membrane seal pressure
 x_lobe_bag_seal = L / 2  # [m] Longitudinal position of the lobe bag seal at the stern relative to motion coord. system
-x_finger_seal = L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
+x_finger_seal = -L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
 p_0 = 3500  # [Pa] excess pressure in the air cushion
 
 # ------- Comparison with Veres ------

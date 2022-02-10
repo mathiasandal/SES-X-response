@@ -176,7 +176,7 @@ def excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_
 
     k = omega ** 2 / g  # calculate wave number
 
-    # excitation force amplitude in heave (Multiplied with 1j relative to the formula in the user's manual)
+    # excitation force amplitude in heave
     f_3 = -1j * (p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
                  + p_s * b / np.sin(np.deg2rad(tau_s)) * np.exp(1j * k * x_s * np.cos(np.deg2rad(beta)))) * zeta_a
 
@@ -184,7 +184,8 @@ def excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_
     f_5 = 1j * (x_b * p_0 * b / np.sin(np.deg2rad(tau_b)) * np.exp(1j * k * x_b * np.cos(np.deg2rad(beta)))
                 + x_s * p_s * b / np.sin(np.deg2rad(tau_s)) * np.exp(1j * k * x_s * np.cos(np.deg2rad(beta)))) * zeta_a
 
-    return 1j * f_3, -1j * f_5  # Multiply with 1j and -1j to get the correct values
+    return f_3, f_5
+    #return 1j * f_3, -1j * f_5  # Multiply with 1j and -1j to get the correct values
 
 
 def excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=1, g=9.81):
@@ -229,3 +230,26 @@ def excitation_skirts(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas, beta, zeta_a=
         f_3_seals[i], f_5_seals[i] = excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omegas[i], beta, zeta_a, g)
 
     return f_3_seals, f_5_seals
+
+
+if __name__ == "__main__":
+
+    # properties
+    L = 20  # [m] length of the vessel
+    b = 7  # [m] beam of air cushion
+    b_seals = 7  # [m] Beam of the seals
+    tau_b = 60  # [deg] angle of the bow finger seal
+    tau_s = 30  # [deg] angle of the stern lobe bag seal
+    p_s = 0  # [Pa] Membrane seal pressure
+    x_s = L / 2  # [m] Longitudinal position of the lobe bag seal at the stern relative to motion coord. system
+    x_b = -L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
+    p_0 = 3500  # [Pa] excess pressure in the air cushion
+
+    beta = 0  # [deg] wave heading
+    omega = 62.83186  # [rad/s] encounter frequency
+
+    f_3_veres = -28214.383 + 1981.9434j
+    f_5_veres = -282144.31 + 19819.467j
+
+    f_3, f_5 = excitation_finger_at_bow_lobe_bag_at_the_stern(b, tau_b, tau_s, p_0, p_s, x_b, x_s, omega, beta)
+
