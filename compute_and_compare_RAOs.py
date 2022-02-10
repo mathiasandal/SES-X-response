@@ -38,7 +38,12 @@ L = 20  # [m] length of the vessel
 b = 7  # [m] beam of air cushion
 
 # Compute wave pumping excitation
-f_ex_7 = wave_pumping_rect(L/2, L/2, b/2, b/2, FREQ_re7, HEAD_re7[0])
+x_s = L/2
+x_f = -L/2
+y_s = b/2
+y_p = -b/2
+
+f_ex_7 = wave_pumping_rect(x_f, x_s, y_p, y_s, omegas, HEAD_re7[0])
 
 for i in range(6):
     for j in range(n_frequencies):

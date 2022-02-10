@@ -110,7 +110,12 @@ df['f_5_rel_err'] = np.abs((df['f_5_veres'] - df['f_5_python']) / df['f_5_veres'
 
 
 # Compute wave pumping excitation
-f_ex_7 = wave_pumping_rect(L/2, L/2, b/2, b/2, FREQ_a, HEAD_a[0])
+x_s = L/2
+x_f = -L/2
+y_s = b/2
+y_p = -b/2
+
+f_ex_7 = wave_pumping_rect(x_f, x_s, y_p, y_s, FREQ_a, HEAD_a[0])
 
 a = f_ex_with_air.transpose()
 
