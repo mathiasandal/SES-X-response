@@ -6,19 +6,65 @@ from Wave_response_utilities import add_row_and_column, decouple_matrix
 
 '''Contains all functions related to things retrieved from VERES'''
 
+
 def read_re5_file(filename):
     """
     Reads a *_ses.re5 file created by VERES
 
-    A description of a *.re7 file is found in page 94 of the ShipX Vessel Responses (VERES) User's manual.
+    A description of a *.re5 file is found in page 94 of the ShipX Vessel Responses (VERES) User's manual.
     """
 
     f = open(filename, "r")  # open file for reading
 
-    for i in range(6):  # skips first six lines
+    for i in range(7):  # skips first six lines
         f.readline()
 
-    return 0
+    # Read in parameters
+    RHOSW, GRAV, LSCALE = [float(i) for i in f.readline().split()]
+    LPP, BREADTH, DRAUGHT = [float(i) for i in f.readline().split()]
+    XCG, ZCG = [float(i) for i in f.readline().split()]
+    NOVEL, NOHEAD, NOFREQ = [int(i) for i in f.readline().split()]
+    NRESPS = [int(i) for i in f.readline().split()][0]
+
+    # Initialize lists
+    print(0)
+    RESPID = [0] * NRESPS
+    ISYM = [0] * NRESPS
+    RESUNIT = [0] * NRESPS
+    RESTXT1 = [0] * NRESPS
+    RESTXT2 = [0] * NRESPS
+    RESTXT3 = [0] * NRESPS
+    RESTXT4 = [0] * NRESPS
+
+    # initialize more arrays
+    VEL = np.zeros(NOVEL)
+    HEAD = np.zeros(NOHEAD)
+    FREQ = np.zeros(NOFREQ)
+
+    for ires in range(NRESPS):
+        RESPID[ires], ISYM[ires], RESUNIT[ires], RESTXT1[ires], RESTXT2[ires], RESTXT3[ires], RESTXT4[ires] = \
+            [str(i) for i in f.readline().split()]
+
+    # Initialize arrays
+    HYD = np.zeros([NOVEL, 6])
+    TREHYD = np.zeros([NOVEL, 3])
+    RREHYD = np.zeros([NOVEL, 3])
+
+    RETRANS = np.zeros([NRESPS, NOFREQ, NOHEAD, NOVEL])
+    IMTRANS = np.zeros([NRESPS, NOFREQ, NOHEAD, NOVEL])
+
+
+    for ivel in range(NOVEL):
+        HYD[ivel, :] = [float(i) for i in f.readline().split()]
+        for ihead in range(NOHEAD):
+            for ifreq in range(NOFREQ):
+                VEL[ivel], HEAD[ihead], FREQ[ifreq] = [float(i) for i in f.readline().split()]
+                for l in range(NRESPS):
+                    RESPID[l], RETRANS[l, ifreq, ihead, ivel], IMTRANS[l, ifreq, ihead, ivel] = \
+                        [float(i) for i in f.readline().split()]
+
+    return FREQ, RETRANS[0, :, 0, 0], IMTRANS[0, :, 0, 0]
+
 
 def read_re7_file(filename):
     # TODO: Fix/add documentation
@@ -456,7 +502,4 @@ def uncoupled_natural_frequency(encounter_frequency, M, C, A, tol=10 - 8):
 
 
 if __name__ == "__main__":
-    
-    path = "Input files/Conceptual SES/with air cushion/input_ses.re5"
-
-    a = read_re5_file(path)
+    print(0)
