@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from veres import read_re8_file
 from bow_and_stern_seals import excitation_skirts
-from air_cushion import wave_pumping_rect
+from air_cushion import wave_pumping_rect, wave_pumping_rectangle
 
 """
 This script compares excitation forces from Veres on a simplified SES geometry with rectangular side hulls. 
@@ -120,5 +120,17 @@ f_ex_7 = wave_pumping_rect(x_f, x_s, y_p, y_s, FREQ_a, HEAD_a[0])
 a = f_ex_with_air.transpose()
 
 f_ex = np.vstack([f_ex_with_air.transpose(), f_ex_7])
+
+# Expressions for comparisons
+zeta_a = 1
+g = 9.81
+beta = HEAD_na[0]
+omegas = FREQ_a
+k = np.power(omegas, 2) / g
+theta = k * x_s * np.cos(beta)
+a = 1j * zeta_a * (y_s - y_p) / np.cos(beta) * np.divide(omegas, k)
+f_wp_comparison = np.multiply(a, (np.exp(-1j * theta) - np.exp(1j * theta)))
+
+comp = f_wp_comparison - f_ex_7
 
 print(df)
