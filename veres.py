@@ -6,6 +6,19 @@ from Wave_response_utilities import add_row_and_column, decouple_matrix
 
 '''Contains all functions related to things retrieved from VERES'''
 
+def read_re5_file(filename):
+    """
+    Reads a *_ses.re5 file created by VERES
+
+    A description of a *.re7 file is found in page 94 of the ShipX Vessel Responses (VERES) User's manual.
+    """
+
+    f = open(filename, "r")  # open file for reading
+
+    for i in range(6):  # skips first six lines
+        f.readline()
+
+    return 0
 
 def read_re7_file(filename):
     # TODO: Fix/add documentation
@@ -443,4 +456,7 @@ def uncoupled_natural_frequency(encounter_frequency, M, C, A, tol=10 - 8):
 
 
 if __name__ == "__main__":
-    print(0)
+    
+    path = "Input files/Conceptual SES/with air cushion/input_ses.re5"
+
+    a = read_re5_file(path)
