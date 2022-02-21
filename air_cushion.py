@@ -246,11 +246,13 @@ def wave_pumping_air_cushion(b, l_1, l_2, x_prime, beta, omega, g=9.81):
 
     k = omega**2/g  # calculate wave number
 
+    accepted_error = 1e-9
+
     # Compute analytical solution to integral of spatial variation over the air cushion
-    if np.sin(np.deg2rad(beta)) == 0:  # sin(beta) = 0
+    if np.abs(np.sin(np.deg2rad(beta))) < accepted_error:  # sin(beta) = 0
         I_1 = b/k/np.cos(np.deg2rad(beta)) * (np.exp(-1j*k*x_prime*np.cos(np.deg2rad(beta))))
         I_2 = 0
-    elif np.cos(np.deg2rad(beta)) == 0:  # cos(beta) = 0
+    elif np.abs(np.cos(np.deg2rad(beta))) < accepted_error:  # cos(beta) = 0
         I_1 = 2*np.sin(k*b/2*np.sin(np.deg2rad(beta)))/k/np.sin(np.deg2rad(beta))\
               * (x_prime*np.exp(-1j*k*x_prime*np.cos(np.deg2rad(beta))) -
                 (x_prime - l_1)*np.exp(-1j*k*(x_prime - l_1)*np.cos(np.deg2rad(beta))))
@@ -311,10 +313,12 @@ def wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a=1, g=9.81):
 
     k = omega ** 2 / g  # calculate wave number
 
-    if np.sin(np.deg2rad(beta)) == 0:
+    accepted_error = 1e-9
+
+    if np.abs(np.sin(np.deg2rad(beta))) < accepted_error:
         F_wp_amp = 1j * omega * zeta_a * (y_s - y_p) / k / np.cos(np.deg2rad(beta)) * \
                    (np.exp(-1j * k * x_s * np.cos(np.deg2rad(beta))) - np.exp(-1j * k * x_f * np.cos(np.deg2rad(beta))))
-    elif np.cos(np.deg2rad(beta)) == 0:
+    elif np.abs(np.cos(np.deg2rad(beta))) < accepted_error:
         F_wp_amp = 1j * omega * zeta_a * (x_s - x_f) / k / np.sin(np.deg2rad(beta)) * \
                    (np.exp(-1j * k * y_s * np.sin(np.deg2rad(beta))) - np.exp(-1j * k * y_p * np.sin(np.deg2rad(beta))))
     else:
