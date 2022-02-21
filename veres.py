@@ -502,4 +502,28 @@ def uncoupled_natural_frequency(encounter_frequency, M, C, A, tol=10 - 8):
 
 
 if __name__ == "__main__":
-    print(0)
+    import matplotlib.pyplot as plt
+
+    path_re5 = "Input files/Conceptual SES/with air cushion/input_ses.re5"
+    path_re7 = "Input files/Conceptual SES/with air cushion/input.re7"
+
+    # Define some parameters
+    p_0 = 3500  # [Pa]
+    rho = 1025  # [kg/m^3]
+    g = 9.81  # [m/s^2]
+    L = 20  # [m]
+    zeta_a = 1  # [m]
+
+    frequency_nond, real_trans, imag_trans = read_re5_file(path_re5)
+
+    VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
+
+    trans_nond = np.sqrt(np.power(real_trans, 2) + np.power(imag_trans, 2))
+    trans = trans_nond * rho * g * zeta_a / p_0
+    frequency = frequency_nond * np.sqrt(g / L)
+
+    plt.plot(frequency, trans, '-x')
+    plt.xlabel('encounter frequency [rad/s]')
+    plt.ylabel('$\\eta_{7}$')
+    plt.title('RAO in uniform pressure')
+    plt.show()
