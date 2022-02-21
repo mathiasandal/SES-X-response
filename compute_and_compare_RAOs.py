@@ -1,4 +1,4 @@
-from veres import read_re8_file, read_re7_file, iterate_natural_frequencies, print_natfrequencies_and_eigenmodes
+from veres import read_re8_file, read_re7_file, read_re5_file, iterate_natural_frequencies, print_natfrequencies_and_eigenmodes
 from air_cushion import wave_pumping_rect
 from Wave_response_utilities import solve_eq_motion_steady_state, add_row_and_column
 import numpy as np
@@ -76,6 +76,9 @@ nat_frequencies, eigen_modes = la.eig(C[40, :, :], M + A[40, :, :])
 
 df_nat = print_natfrequencies_and_eigenmodes(np.power(nat_frequencies, 0.5), eigen_modes)
 
+k = np.power(omegas, 2) / 9.81
+wavelength = np.divide(2*np.pi, k)
+
 # Compute and compare heave accelerations
 
 
@@ -96,10 +99,38 @@ if plot_raos:
     plt.title('RAO for acceleration in heave')
     plt.show()
 
-    plt.plot(omegas, raos_magnitude[:, 6], '-x')
-    plt.xlabel('encounter frequency [rad/s]')
+    # Plot and compare uniform pressure RAO
+    path_re5 = "Input files/Conceptual SES/with air cushion/input_ses.re5"
+    path_re7 = "Input files/Conceptual SES/with air cushion/input.re7"
+
+    # Define some parameters
+    p_0 = 3500  # [Pa]
+    rho = 1025  # [kg/m^3]
+    g = 9.81  # [m/s^2]
+    L = 20  # [m]
+    zeta_a = 1  # [m]
+
+    frequency_nond, real_trans, imag_trans = read_re5_file(path_re5)
+
+    VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
+
+    trans_nond = np.sqrt(np.power(real_trans, 2) + np.power(imag_trans, 2))
+    trans = trans_nond * rho * g * zeta_a / p_0
+    frequency = frequency_nond * np.sqrt(g / L)
+
+    plot_type = 2
+    if plot_type == 1:
+        plt.plot(frequency, trans, '-rx', label='Veres')
+        plt.plot(omegas, raos_magnitude[:, 6], '-bx', label='Python')
+        plt.xlabel('encounter frequency [rad/s]')
+    elif plot_type == 2:
+        plt.plot(wavelength, trans, '-rx', label='Veres')
+        plt.plot(wavelength, raos_magnitude[:, 6], '-bx', label='Python')
+        plt.xlabel('$\\lambda[m]$')
+
     plt.ylabel('$\\eta_{7}$')
     plt.title('RAO in uniform pressure')
+    plt.legend()
     plt.show()
 
 
