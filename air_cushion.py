@@ -250,7 +250,8 @@ def wave_pumping_air_cushion(b, l_1, l_2, x_prime, beta, omega, g=9.81):
 
     # Compute analytical solution to integral of spatial variation over the air cushion
     if np.abs(np.sin(np.deg2rad(beta))) < accepted_error:  # sin(beta) = 0
-        I_1 = b/k/np.cos(np.deg2rad(beta)) * (np.exp(-1j*k*x_prime*np.cos(np.deg2rad(beta))))
+        I_1 = b/k/np.cos(np.deg2rad(beta)) * (np.exp(-1j * k * x_prime * np.cos(np.deg2rad(beta))) -
+                                              np.exp(-1j * k * (x_prime - l_1) * np.cos(np.deg2rad(beta))))
         I_2 = 0
     elif np.abs(np.cos(np.deg2rad(beta))) < accepted_error:  # cos(beta) = 0
         I_1 = 2*np.sin(k*b/2*np.sin(np.deg2rad(beta)))/k/np.sin(np.deg2rad(beta))\
