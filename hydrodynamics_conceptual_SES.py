@@ -76,14 +76,14 @@ z_B = -d / 2  # [m] vertical position
 
 # properties
 b_seals = b_c  # [m] Beam of the seals
-tau_b = 60  # [deg] angle of the bow finger seal
-tau_s = 30  # [deg] angle of the stern lobe bag seal
+tau_b = 89  # [deg] angle of the bow finger seal
+tau_s = 89  # [deg] angle of the stern lobe bag seal
 p_s = 0  # [Pa] Membrane seal pressure
 x_lobe_bag_seal = L / 2  # [m] Longitudinal position of the lobe bag seal at the stern relative to motion coord. system
 x_finger_seal = -L / 2  # [m] Longitudinal position of the finger seal at the bow relative to motion coord. system
 
 # Computes restoring coefficients
-C_33_seal, C_35_seal, C_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(b_seals, tau_b, tau_s, p_0, p_s,
+C_33_seal, C_35_seal, C_55_seal = restoring_finger_at_bow_lobe_bag_at_the_stern(b_seals, tau_b, tau_s, 0, p_s,
                                                                                 x_finger_seal, x_lobe_bag_seal)
 
 # ------- Hydrodynamic coefficients -------
@@ -133,7 +133,7 @@ B_python = np.array([[0,     0,      0,    0,      0,   0,      0],
 
 # ------- Comparison with Veres ------
 
-path_re7_air_cushion = 'Input files/Conceptual SES/with air cushion/input.re7'
+path_re7_air_cushion = 'Input files/Conceptual SES/with air cushion no skirts/input.re7'
 path_re7_no_air_cushion = 'Input files/Conceptual SES/without air cushion/input.re7'
 
 # Get Veres results with air cushion turned on

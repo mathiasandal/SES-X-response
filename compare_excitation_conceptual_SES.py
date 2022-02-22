@@ -27,7 +27,7 @@ p_0 = 3500  # [Pa] excess pressure in the air cushion
 
 # ------- Comparison with Veres ------
 
-path_re8_air_cushion = 'Input files/Conceptual SES/with air cushion/input.re8'
+path_re8_air_cushion = 'Input files/Conceptual SES/with air cushion no skirts/input.re8'
 path_re8_no_air_cushion = 'Input files/Conceptual SES/without air cushion/input.re8'
 
 REFORCE_na, IMFORCE_na, VEL_na, HEAD_na, FREQ_na, XMTN_na, ZMTN_na = read_re8_file(path_re8_no_air_cushion)
