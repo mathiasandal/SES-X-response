@@ -23,8 +23,8 @@ print('Effective beam: ' + str(b_eff) + '[m]')
 print('Effective length: ' + str(l_eff) + '[m]')
 
 # Properties of rectangular cushion
-L = 20  # [m]
-cushion_width = 7  # [m]
+L = 18  # [m]
+cushion_width = 3.4  # [m]
 x_s = L/2  # [m]
 x_f = -L/2  # [m]
 y_s = cushion_width/2  # [m]
@@ -40,7 +40,7 @@ f_wp_sesx = wave_pumping_excitation(b, l_1, l_2, x_prime, beta, frequencies)
 
 
 plot_type = 3  # determines what the x-axis should be
-plot_rect = False
+plot_rect = True
 # Plot for rectangular air cushion
 if plot_rect:
     if plot_type == 1:
@@ -79,6 +79,13 @@ if plot_sesx:
     plt.title('Wave pumping excitation for SES-X air cushion. $l_1 = %.0f$m, ' % l_1 + '$l_2 = %.0f$m, ' % l_2 + '$b = %0.1f$m, ' % b + '$\\beta = %0.1f^{\circ}$' % beta)
     plt.show()
 
+    plt.plot(wavelength, np.abs(f_wp_sesx), label='SES-X shape')
+    plt.plot(wavelength, np.abs(f_wp_rect), label='Rectangle')
+    plt.title('Wave pumping excitation for SES-X air cushion. $l_1 = %.0f$m, ' % l_1 + '$l_2 = %.0f$m, ' % l_2 + '$b = %0.1f$m, ' % b + '$\\beta = %0.1f^{\circ}$' % beta)
+    plt.xlabel("$\\lambda [m]$")
+    plt.xlim([0, 40])
+    plt.legend()
+    plt.show()
 
 """
 f_wp_fasit = wave_pumping_rectangle(x_f, x_s, y_p, y_s, omega, beta, zeta_a, g)
@@ -89,69 +96,4 @@ theta = k * x_s * np.cos(beta)
 f_wp_1 = a * (np.exp(-1j * theta) - np.exp(1j * theta))
 f_wp_2 = -2j * a * np.sin(theta)
 """
-
-
-def read_re5_file(filename):
-    """
-    Reads a *_ses.re5 file created by VERES
-
-    A description of a *.re5 file is found in page 94 of the ShipX Vessel Responses (VERES) User's manual.
-    """
-
-    f = open(filename, "r")  # open file for reading
-
-    for i in range(7):  # skips first six lines
-        f.readline()
-
-    # Read in parameters
-    RHOSW, GRAV, LSCALE = [float(i) for i in f.readline().split()]
-    LPP, BREADTH, DRAUGHT = [float(i) for i in f.readline().split()]
-    XCG, ZCG = [float(i) for i in f.readline().split()]
-    NOVEL, NOHEAD, NOFREQ = [int(i) for i in f.readline().split()]
-    NRESPS = [int(i) for i in f.readline().split()][0]
-
-    # Initialize lists
-    print(0)
-    RESPID = [0] * NRESPS
-    ISYM = [0] * NRESPS
-    RESUNIT = [0] * NRESPS
-    RESTXT1 = [0] * NRESPS
-    RESTXT2 = [0] * NRESPS
-    RESTXT3 = [0] * NRESPS
-    RESTXT4 = [0] * NRESPS
-
-    # initialize more arrays
-    VEL = np.zeros(NOVEL)
-    HEAD = np.zeros(NOHEAD)
-    FREQ = np.zeros(NOFREQ)
-
-    for ires in range(NRESPS):
-        RESPID[ires], ISYM[ires], RESUNIT[ires], RESTXT1[ires], RESTXT2[ires], RESTXT3[ires], RESTXT4[ires] = \
-            [str(i) for i in f.readline().split()]
-
-    # Initialize arrays
-    HYD = np.zeros([NOVEL, 6])
-    TREHYD = np.zeros([NOVEL, 3])
-    RREHYD = np.zeros([NOVEL, 3])
-
-    RETRANS = np.zeros([NRESPS, NOFREQ, NOHEAD, NOVEL])
-    IMTRANS = np.zeros([NRESPS, NOFREQ, NOHEAD, NOVEL])
-
-
-    for ivel in range(NOVEL):
-        HYD[ivel, :] = [float(i) for i in f.readline().split()]
-        for ihead in range(NOHEAD):
-            for ifreq in range(NOFREQ):
-                VEL[ivel], HEAD[ihead], FREQ[ifreq] = [float(i) for i in f.readline().split()]
-                for l in range(NRESPS):
-                    RESPID[l], RETRANS[l, ifreq, ihead, ivel], IMTRANS[l, ifreq, ihead, ivel] = \
-                        [float(i) for i in f.readline().split()]
-
-    return FREQ, RETRANS[0, :, 0, 0], IMTRANS[0, :, 0, 0]
-
-
-#path = "Input files/Conceptual SES/with air cushion/input_ses.re5"
-
-#frquency, real_trans, imag_trans = read_re5_file(path)
-
 
