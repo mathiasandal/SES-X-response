@@ -1,4 +1,4 @@
-from veres import read_re8_file, read_re7_file, read_re5_file, iterate_natural_frequencies, print_natfrequencies_and_eigenmodes
+from veres import read_re1_file, read_re8_file, read_re7_file, read_re5_file, iterate_natural_frequencies, print_natfrequencies_and_eigenmodes
 from air_cushion import wave_pumping_rect
 from Wave_response_utilities import solve_eq_motion_steady_state, add_row_and_column
 import numpy as np
@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 path = 'Input files/Conceptual SES/with air cushion/'
 path_re7 = path + 'input.re7'
 path_re8 = path + 'input.re8'
+path_re1 = path + 'input.re1'
 
 # Read input.re7 file to get hydrodynamic coefficients
 M, A_n, B_n, C_n, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_re7_file(path_re7)
@@ -79,21 +80,31 @@ df_nat = print_natfrequencies_and_eigenmodes(np.power(nat_frequencies, 0.5), eig
 k = np.power(omegas, 2) / 9.81
 wavelength = np.divide(2*np.pi, k)
 
-# Compute and compare heave accelerations
+# Read RAO computed in VERES
 
+
+# Compute and compare heave accelerations
+# Read RAOs
+RETRANS, IMTRANS, VEL_1, HEAD_1, FREQ_1, XMTN_1, ZMTN_1 = read_re1_file(path_re1)
+
+rao_veres_re = RETRANS[:, :, 0, 0]
+rao_veres_im = IMTRANS[:, :, 0, 0]
+rao_veres = rao_veres_re + 1j * rao_veres_im
 
 # Plot RAOs
 
 plot_raos = True
 
 if plot_raos:
-    plt.plot(omegas, raos_magnitude[:, 2], '-x')
+    plt.plot(omegas, raos_magnitude[:, 2], '-x', label='python')
+    plt.plot(omegas, np.abs(rao_veres[2, :]), '-x', label='veres')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$\\eta_{3}/\\zeta_a$')
     plt.title('RAO in heave')
     plt.show()
 
-    plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]), '-x')
+    plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]), '-x', label='python')
+    plt.plot(omegas, np.abs(np.multiply(np.power(omegas, 2), rao_veres[2, :])), '-x', label='veres')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$|\\omega^2\\eta_{3}|/\\zeta_a[s^{-2}]$')
     plt.title('RAO for acceleration in heave')

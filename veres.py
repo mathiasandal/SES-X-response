@@ -6,6 +6,49 @@ from Wave_response_utilities import add_row_and_column, decouple_matrix
 
 '''Contains all functions related to things retrieved from VERES'''
 
+def read_re1_file(filename):
+    """
+    Reads a *.re1 file created by VERES
+
+    A description of a *.re1 file is found in page 86 of the ShipX Vessel Responses (VERES) User's manual.
+    """
+    f = open(filename, "r")  # open file for reading
+
+    for i in range(6):  # skips first six lines
+        f.readline()
+
+    # Read in parameters
+    RHOSW, GRAV = [float(i) for i in f.readline().split()]
+    LPP, BREADTH, DRAUGHT = [float(i) for i in f.readline().split()]
+    LCG, VCG = [float(i) for i in f.readline().split()]
+    NOVEL, NOHEAD, NOFREQ, NDOF = [int(i) for i in f.readline().split()]
+
+    # initialize more arrays
+    VEL = np.zeros(NOVEL)
+    HEAD = np.zeros(NOHEAD)
+    FREQ = np.zeros(NOFREQ)
+    SINK = np.zeros(NOVEL)
+    TRIM = np.zeros(NOVEL)
+    XMTN = np.zeros(NOVEL)
+    ZMTN = np.zeros(NOVEL)
+
+    # initialize lists to contain real and imaginary parts of RAO amplitudes
+    RETRANS = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])
+    IMTRANS = np.zeros([NDOF, NOFREQ, NOHEAD, NOVEL])
+
+
+    for ivel in range(NOVEL):
+        VEL[ivel], SINK[ivel], TRIM[ivel], XMTN[ivel], ZMTN[ivel] = [float(i) for i in f.readline().split()]
+        for ihead in range(NOHEAD):
+            HEAD[ihead] = [float(i) for i in f.readline().split()][0]
+            for ifreq in range(NOFREQ):
+                FREQ[ifreq] = [float(i) for i in f.readline().split()][0]
+                for dof in range(NDOF):
+                    dummy, RETRANS[dof, ifreq, ihead, ivel], IMTRANS[dof, ifreq, ihead, ivel] = \
+                        [float(i) for i in f.readline().split()]
+
+    return RETRANS, IMTRANS, VEL, HEAD, FREQ, XMTN, ZMTN
+
 
 def read_re5_file(filename):
     """
@@ -16,7 +59,7 @@ def read_re5_file(filename):
 
     f = open(filename, "r")  # open file for reading
 
-    for i in range(7):  # skips first six lines
+    for i in range(7):  # skips first seven lines
         f.readline()
 
     # Read in parameters
@@ -506,6 +549,7 @@ if __name__ == "__main__":
 
     path_re5 = "Input files/Conceptual SES/with air cushion/input_ses.re5"
     path_re7 = "Input files/Conceptual SES/with air cushion/input.re7"
+    path_re1 = "Input files/Conceptual SES/with air cushion/input.re1"
 
     # Define some parameters
     p_0 = 3500  # [Pa]
@@ -527,3 +571,12 @@ if __name__ == "__main__":
     plt.ylabel('$\\eta_{7}$')
     plt.title('RAO in uniform pressure')
     plt.show()
+
+    # Read RAOs
+    RETRANS, IMTRANS, VEL_1, HEAD_1, FREQ_1, XMTN_1, ZMTN_1 = read_re1_file(path_re1)
+
+    rao_re = RETRANS[:, :, 0, 0]
+    rao_im = IMTRANS[:, :, 0, 0]
+    rao = rao_re + 1j * rao_im
+
+    print('hi')
