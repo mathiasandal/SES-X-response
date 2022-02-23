@@ -50,7 +50,7 @@ for i in range(6):
     for j in range(n_frequencies):
         f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
 
-f_ex[6, :] = f_ex_7  # add the wave pumping to the force vectors
+f_ex[6, :] = 1j * f_ex_7  # add the wave pumping to the force vectors
 
 # Compute and store complex response amplitudes
 
@@ -60,6 +60,7 @@ for i in range(n_frequencies):
 
 raos_magnitude = np.transpose(np.abs(raos))  # store the magnitude of the complex response amplitude
 raos_phase = np.transpose(np.rad2deg(np.angle(raos)))  # store the phase of the complex response amplitude
+raos_python = np.transpose(raos)
 
 # Organize RAO data in a similar manner as in the Excel Veres postprocessor
 dat = np.array([raos_magnitude[:, 0], raos_phase[:, 0], raos_magnitude[:, 1], raos_phase[:, 1],
@@ -89,7 +90,31 @@ RETRANS, IMTRANS, VEL_1, HEAD_1, FREQ_1, XMTN_1, ZMTN_1 = read_re1_file(path_re1
 
 rao_veres_re = RETRANS[:, :, 0, 0]
 rao_veres_im = IMTRANS[:, :, 0, 0]
-rao_veres = rao_veres_re + 1j * rao_veres_im
+rao_veres = np.transpose(rao_veres_re + 1j * rao_veres_im)
+
+# Compute RAO for uniform pressure calculated in Veres
+# Plot and compare uniform pressure RAO
+path_re5 = "Input files/Conceptual SES/with air cushion/input_ses.re5"
+path_re7 = "Input files/Conceptual SES/with air cushion/input.re7"
+
+# Define some parameters
+p_0 = 3500  # [Pa]
+rho = 1025  # [kg/m^3]
+g = 9.81  # [m/s^2]
+L = 20  # [m]
+zeta_a = 1  # [m]
+
+frequency_nond, real_trans, imag_trans = read_re5_file(path_re5)
+
+VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
+
+trans_nond = np.sqrt(np.power(real_trans, 2) + np.power(imag_trans, 2))
+trans = trans_nond * rho * g * zeta_a / p_0
+frequency = frequency_nond * np.sqrt(g / L)
+
+a = np.array([real_trans + 1j * imag_trans]).transpose()
+rao_veres = np.hstack((rao_veres, a * rho * g * zeta_a / p_0))
+
 
 # Plot RAOs
 
@@ -97,52 +122,67 @@ plot_raos = True
 
 if plot_raos:
     plt.plot(omegas, raos_magnitude[:, 2], '-x', label='python')
-    plt.plot(omegas, np.abs(rao_veres[2, :]), '-x', label='veres')
+    plt.plot(omegas, np.abs(rao_veres[:, 2]), '-x', label='veres')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$\\eta_{3}/\\zeta_a$')
     plt.title('RAO in heave')
     plt.show()
 
     plt.plot(omegas, np.multiply(np.power(omegas, 2), raos_magnitude[:, 2]), '-x', label='python')
-    plt.plot(omegas, np.abs(np.multiply(np.power(omegas, 2), rao_veres[2, :])), '-x', label='veres')
+    plt.plot(omegas, np.abs(np.multiply(np.power(omegas, 2), rao_veres[:, 2])), '-x', label='veres')
     plt.xlabel('encounter frequency [rad/s]')
     plt.ylabel('$|\\omega^2\\eta_{3}|/\\zeta_a[s^{-2}]$')
     plt.title('RAO for acceleration in heave')
     plt.show()
 
-    # Plot and compare uniform pressure RAO
-    path_re5 = "Input files/Conceptual SES/with air cushion/input_ses.re5"
-    path_re7 = "Input files/Conceptual SES/with air cushion/input.re7"
-
-    # Define some parameters
-    p_0 = 3500  # [Pa]
-    rho = 1025  # [kg/m^3]
-    g = 9.81  # [m/s^2]
-    L = 20  # [m]
-    zeta_a = 1  # [m]
-
-    frequency_nond, real_trans, imag_trans = read_re5_file(path_re5)
-
-    VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF = read_re7_file(path_re7)
-
-    trans_nond = np.sqrt(np.power(real_trans, 2) + np.power(imag_trans, 2))
-    trans = trans_nond * rho * g * zeta_a / p_0
-    frequency = frequency_nond * np.sqrt(g / L)
-
     plot_type = 2
     if plot_type == 1:
         plt.plot(frequency, trans, '-rx', label='Veres')
-        plt.plot(omegas, raos_magnitude[:, 6], '-bx', label='Python')
+        plt.plot(omegas, raos_magnitude[:, 6], fillstyle='none', marker='o', linestyle='-', label='Python')
         plt.xlabel('encounter frequency [rad/s]')
     elif plot_type == 2:
         plt.plot(wavelength, trans, '-rx', label='Veres')
-        plt.plot(wavelength, raos_magnitude[:, 6], '-bx', label='Python')
+        plt.plot(wavelength, raos_magnitude[:, 6], fillstyle='none', marker='o', linestyle='-', label='Python')
         plt.xlabel('$\\lambda[m]$')
 
     plt.ylabel('$\\eta_{7}$')
     plt.title('RAO in uniform pressure')
     plt.legend()
     plt.show()
+
+    plot_dof = 2
+
+    # plot RAO
+    if plot_type == 1:
+        plt.plot(omegas, raos_magnitude[:, plot_dof], '-x', label='python')
+        plt.plot(omegas, np.abs(rao_veres[:, plot_dof]), fillstyle='none', marker='o', linestyle='-', label='veres')
+        plt.xlabel('encounter frequency [rad/s]')
+    elif plot_type == 2:
+        plt.plot(wavelength, raos_magnitude[:, plot_dof], '-x', label='python')
+        plt.plot(wavelength, np.abs(rao_veres[:, plot_dof]), fillstyle='none', marker='o', linestyle='-', label='veres')
+        plt.xlabel('$\\lambda[m]$')
+
+    plt.ylabel('$\\eta_{' + str(plot_dof + 1) + '}/\\zeta_a$')
+    plt.legend()
+    plt.show()
+
+    # plot phase
+    if plot_type == 1:
+        plt.plot(omegas, np.angle(raos_python[:, plot_dof]) * 180, '-x', label='python')
+        plt.plot(omegas, np.angle(rao_veres[:, plot_dof]) * 180, fillstyle='none', marker='o', linestyle='-', label='veres')
+        plt.xlabel('encounter frequency [rad/s]')
+    elif plot_type == 2:
+        plt.plot(wavelength, np.rad2deg(np.angle(raos_python[:, plot_dof])), '-x', label='python')
+        plt.plot(wavelength, np.rad2deg(np.angle(rao_veres[:, plot_dof])), fillstyle='none', marker='o', linestyle='-', label='veres')
+        plt.xlabel('$\\lambda[m]$')
+
+    plt.ylabel('Phase shift, ' + '$\\eta_{' + str(plot_dof + 1) + '}/\\zeta_a$')
+    plt.legend()
+    plt.show()
+
+
+comparison_magnitude = np.divide(np.abs(np.abs(rao_veres) - np.abs(raos_python)), np.abs(rao_veres))
+comparison_phase = np.divide(np.abs(np.angle(rao_veres) - np.angle(raos_python)), np.abs(np.angle(rao_veres)))
 
 
 print('1')
