@@ -419,10 +419,11 @@ def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega, heading, zeta_a=1, g=9.81):
         '''
 
         # Compute contribution of the rectangular part of the air cushion for the wave pumping
+        y_p = -y_s  # assume symmetry over xz-plane.
         T_2 = 1/k**2/np.sin(beta)/np.cos(beta) * (- np.exp(-1j * k * (x_s * np.cos(beta) + y_s * np.sin(beta)))
-                                                  + np.exp(-1j * k * (x_s * np.cos(beta) - y_s * np.sin(beta)))
+                                                  + np.exp(-1j * k * (x_s * np.cos(beta) + y_p * np.sin(beta)))
                                                   + np.exp(-1j * k * (x_f * np.cos(beta) + y_s * np.sin(beta)))
-                                                  - np.exp(-1j * k * (x_f * np.cos(beta) - y_s * np.sin(beta))))
+                                                  - np.exp(-1j * k * (x_f * np.cos(beta) + y_p * np.sin(beta))))
 
     F_wp_amp = 1j * omega * zeta_a * (T_1 + T_2)
 
