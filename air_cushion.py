@@ -368,6 +368,66 @@ def wave_pumping_rect(x_f, x_s, y_p, y_s, omegas, beta, zeta_a=1, g=9.81):
     return f_ex_7
 
 
+def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega, heading, zeta_a=1, g=9.81):
+    k = omega ** 2 / g  # calculate wave number
+    beta = np.deg2rad(heading)  # convert wave heading from degrees to radians
+    accepted_error = 1e-9
+
+    if np.abs(np.sin(beta)) < accepted_error:  # case for sin(beta) close or equal zero
+        # Compute first term of T_1
+        T_11 = 2 * y_s / k / np.cos(beta) * (1 / (x_f - x_b) / k / np.cos(beta) + 1j) * \
+              np.exp(-1j * k * x_f * np.cos(beta))
+        # Compute second term of T_2
+        T_12 = -2 * y_s / (x_f - x_b) / k**2 / np.cos(beta)**2 * np.exp(-1j * k * x_b * np.cos(beta))
+
+        # Compute contribution of the triangular part of the air cushion for the wave pumping
+        T_1 = T_11 + T_12
+
+        # Compute contribution of the rectangular part of the air cushion for the wave pumping
+        y_p = -y_s  # assume symmetry over xz-plane.
+        T_2 = 1j * (y_s - y_p) / k / np.cos(beta) * (np.exp(-1j * k * x_s * np.cos(beta)) -
+                                                     np.exp(-1j * k * x_f * np.cos(beta)))
+
+    elif np.abs(np.cos(beta)) < accepted_error:  # case for cos(beta) close or equal zero
+        # Compute contribution of the triangular part of the air cushion for the wave pumping
+        T_1 = 2 * (np.cos(k * y_s * np.sin(beta)) - 1) / k**2 / (y_s / (x_f - x_b)) / np.sin(beta)**2
+
+        # Compute contribution of the rectangular part of the air cushion for the wave pumping
+        y_p = -y_s  # assume symmetry over xz-plane.
+        T_2 = 1j * (x_s - x_f) / k / np.sin(beta) * (np.exp(-1j * k * y_s * np.sin(beta)) -
+                                                     np.exp(-1j * k * y_p * np.sin(beta)))
+
+    else:  # case for when sin(beta) and cos(beta) is not close or equal to zero
+        # numerator of first term in T_1
+        T_11_n = 2j * np.cos(beta) * np.sin(k * y_s * np.sin(beta)) * np.exp(-1j * k * x_f * np.cos(beta))
+        # denominator of first term in T_1
+        T_11_d = k**2 * np.sin(beta) * (np.cos(beta)**2 + (y_s / (x_f - x_b))**2 * np.sin(beta)**2)
+        # numerator of second term in T_1
+        T_12_n = 2 * y_s / (x_f - x_b) * (np.cos(k * y_s * np.sin(beta)) * np.exp(-1j * k * x_f * np.cos(beta)) -
+                                          np.exp(-1j * k * x_b * np.cos(beta)))
+        # denominator of second term in T_1
+        T_12_d = k**2 * (np.cos(beta)**2 + (y_s / (x_f - x_b))**2 * np.sin(beta)**2)
+
+        # Compute contribution of the triangular part of the air cushion for the wave pumping
+        T_1 = T_11_n / T_11_d + T_12_n / T_12_d
+
+        '''
+        T_1 = 2j * np.cos(beta) * np.sin(k * y_s * np.sin(beta)) * np.exp(-1j * k * x_f * np.cos(beta)) / \
+              k**2 / np.sin(beta) / (np.cos(beta)**2 + (y_s/(x_f - x_b))**2 * np.sin(beta)**2) + 2*y_s/(x_f-x_b) * \
+              (np.cos(k * y_s * np.sin(beta)) * np.exp(-1j * k * x_f * np.cos(beta)) - np.exp(-1j * k * x_b * np.cos(beta))
+               ) / k**2 / (np.cos(beta)**2 + (y_s/(x_f-x_b))**2 * np.sin(beta)**2)
+        '''
+
+        # Compute contribution of the rectangular part of the air cushion for the wave pumping
+        T_2 = 1/k**2/np.sin(beta)/np.cos(beta) * (- np.exp(-1j * k * (x_s * np.cos(beta) + y_s * np.sin(beta)))
+                                                  + np.exp(-1j * k * (x_s * np.cos(beta) - y_s * np.sin(beta)))
+                                                  + np.exp(-1j * k * (x_f * np.cos(beta) + y_s * np.sin(beta)))
+                                                  - np.exp(-1j * k * (x_f * np.cos(beta) - y_s * np.sin(beta))))
+
+    F_wp_amp = 1j * omega * zeta_a * (T_1 + T_2)
+
+    return F_wp_amp
+
 if __name__ == "__main__":
 
     l_1 = 12  # [m] length of the rectangular part of the air cushion
