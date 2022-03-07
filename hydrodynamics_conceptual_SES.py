@@ -110,7 +110,7 @@ C_53 = C_35_seal + C_53_h  # [N] Total restoring coefficient in pitch due to hea
 
 # Damping
 B_73_c = A_b  # [m] equivalent damping coefficient in uniform pressure DOF due to velocity in heave.
-B_75_c = -A_b * x_B  # [m^2] equivalent damping coefficient in uniform pressure DOF due to velocity in pitch.
+B_75_c = -A_b * x_c  # [m^2] equivalent damping coefficient in uniform pressure DOF due to velocity in pitch.
 B_77_c = p_0 * V_c0 / gamma / (p_0 + p_a)  # [m^3] equivalent damping coefficient in uniform pressure DOF.
 
 # ------- Establish stiffness and damping matrix calculated in python -------
