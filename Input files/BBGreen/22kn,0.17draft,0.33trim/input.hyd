@@ -1,0 +1,39 @@
+99
+DATA-CHECK PROPERTIES
+Run name:  veres_Run_planing_condition
+
+Ship name: BBGreen
+Loading condition description:  Design waterline
+
+ShipX exported data
+Main dimensions (from input):
+______________________________________________________________
+
+Length between perpendiculars    (m)     19.900
+Breadth                          (m)      5.958
+Draught, midship                 (m)      0.170
+Sinkage                          (m)      0.000
+Trim, + = aft                  (deg)      0.000
+______________________________________________________________
+
+Number of hulls:   3  -> Trimaran
+
+Coefficients for data check etc.:
+Type                                  Specified    Calculated
+______________________________________________________________
+
+Displacement                (tonnes)       2.93          1.31*
+Vertical center of buoyancy,     KB                     0.116*
+Vertical center of gravity,      VCG      0.500*
+Longitudinal center of buoyancy, LCB                    5.516*
+Longitudinal center of gravity,  LCG      3.448         5.516*
+Longitudinal metacentric height, GMl                  294.284*
+Transverse metacentric height,   GMt                   47.399*
+Roll radius of gyration,         r44      1.000*
+Pitch radius of gyration,        r55      1.000*
+Yaw radius of gyration,          r66      1.000*
+Roll-yaw radius of gyration,     r46      0.000*
+______________________________________________________________
+
+* - Applied in the hydrodynamic calculations
+
