@@ -1,0 +1,81 @@
+     Checking data...
+     
+     VESSEL VELOCITIES:
+     ******************
+     
+     Number of velocities:            NOVEL  =   1
+     
+     Velocity (knots)            Froude number (-)
+     ---------------------------------------------
+            22.00                    0.810
+     ---------------------------------------------
+     
+     
+     Empirical surge, sway and yaw motion limits applied
+     in stern waves close to zero frequency of encounter.
+     
+     NOTE! The correction method is not validated for Fn>0.4, so please
+     so please check the resulting motions carefully!
+     
+     Generating new offsetpoints...
+     
+     INFO: Section  52 (from stern) is out of water. Amount: 2.091 m
+     INFO: Section  51 (from stern) is out of water. Amount: 1.881 m
+     INFO: Section  50 (from stern) is out of water. Amount: 1.672 m
+     INFO: Section  49 (from stern) is out of water. Amount: 1.463 m
+     INFO: Section  48 (from stern) is out of water. Amount: 1.254 m
+     INFO: Section  47 (from stern) is out of water. Amount: 1.045 m
+     INFO: Section  46 (from stern) is out of water. Amount: 0.836 m
+     INFO: Section  45 (from stern) is out of water. Amount: 0.359 m
+     
+     Calculating hydrostatic properties..
+     
+     DATA-CHECK PROPERTIES
+     *********************
+     
+     Main dimensions (from input):
+     ______________________________________________________________
+     
+     Length between perpendiculars    (m)     19.900
+     Breadth                          (m)      5.958
+     Draught, midship                 (m)      0.170
+     Sinkage                          (m)      0.000
+     Trim, + = aft                  (deg)      0.000
+     ______________________________________________________________
+     
+     Number of hulls:   3  -> Trimaran
+     
+     Coefficients for data check etc.:
+     Type                                  Specified    Calculated
+     ______________________________________________________________
+     
+     Displacement                (tonnes)       2.93          1.31*
+     Vertical center of buoyancy,     KB                     0.116*
+     Vertical center of gravity,      VCG      0.500*
+     Longitudinal center of buoyancy, LCB                    5.516*
+     Longitudinal center of gravity,  LCG      3.448         5.516*
+     Longitudinal metacentric height, GMl                  294.284*
+     Transverse metacentric height,   GMt                   47.399*
+     Roll radius of gyration,         r44      1.000*
+     Pitch radius of gyration,        r55      1.000*
+     Yaw radius of gyration,          r66      1.000*
+     Roll-yaw radius of gyration,     r46      0.000*
+     ______________________________________________________________
+     
+     * - Applied in the hydrodynamic calculations
+     
+     Calculating hydrodynamic coefficients for velocity # 1;    22.00 knots:
+     Calculating heading #01 :   0.00 deg...
+     
+     The program has completed successfully!
+     
+     
+     Output of hydrostatic properties has been written to:
+     input.hyd
+     
+     The output has been written to:
+     input.out
+     
+     Motion transferfunction results are written to:
+     input.re1
+     
