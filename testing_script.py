@@ -83,6 +83,7 @@ if plot_sesx:
     plt.plot(wavelength, np.abs(f_wp_rect), label='Rectangle')
     plt.title('Wave pumping excitation for SES-X air cushion. $l_1 = %.0f$m, ' % l_1 + '$l_2 = %.0f$m, ' % l_2 + '$b = %0.1f$m, ' % b + '$\\beta = %0.1f^{\circ}$' % beta)
     plt.xlabel("$\\lambda [m]$")
+    plt.ylabel('$F_{wp} [m^3/s]$')
     plt.xlim([0, 40])
     plt.legend()
     plt.show()

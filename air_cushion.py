@@ -429,6 +429,20 @@ def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega, heading, zeta_a=1, g=9.81):
 
     return F_wp_amp
 
+
+def wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omegas, heading, zeta_a=1, g=9.81):
+    n = len(omegas)  # length of list of omegas
+
+    # initialize f_ex_7
+    f_ex_7 = np.zeros([n], dtype=complex)
+
+    # calculate one complex force amplitude per omega
+    for i in range(n):
+        f_ex_7[i] = wave_pumping_sesx(x_f, x_s, y_s, x_b, omegas[i], heading, zeta_a, g)
+
+    return f_ex_7
+
+
 if __name__ == "__main__":
 
     l_1 = 12  # [m] length of the rectangular part of the air cushion
