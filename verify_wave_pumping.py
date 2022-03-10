@@ -5,7 +5,7 @@ from air_cushion import wave_pumping_rect, wave_pumping_excitation, wave_pumping
 
 g = 9.81  # [m/s^2] acceleration of gravity
 
-heading = 90  # [deg] wave heading
+heading = 0  # [deg] wave heading
 zeta_a = 1  # [m] wave amplitude
 
 # Properties of SES-X air cushion
@@ -30,9 +30,10 @@ y_s = b/2  # [m]
 y_p = -b/2  # [m]
 x_b = -l_2 - l_1/2  # [m]
 
-frequencies = np.linspace(0.5, 17, 10000)
+frequencies = np.linspace(0.5, 200, 10000)
 k = np.power(frequencies, 2) / g
 wavelength = np.divide(2 * np.pi, k)
+frequencies_Hz = frequencies / 2 / np.pi
 
 
 f_wp_rect = 1j*wave_pumping_rect(x_b, x_s, y_p, y_s, frequencies, beta)
@@ -63,6 +64,25 @@ ax2.set_yticks(y_tick*np.pi)
 ax2.set_yticklabels(y_label, fontsize=12)
 '''
 ax2.set_xlabel("$\\lambda [m]$")
+ax2.set_ylabel('Phase shift')
+ax2.set_xlim([0, 12])
+ax2.legend()
+plt.show()
+
+
+fig, (ax1, ax2) = plt.subplots(2)
+ax1.plot(frequencies_Hz, np.abs(f_wp_sesx), label='SES-X shape')
+#ax1.plot(frequencies_Hz, np.abs(f_wp_rect), label='Rectangle')
+fig.suptitle(
+    'Wave pumping excitation for SES-X air cushion. $l_1 = %.0f$m, ' % l_1 + '$l_2 = %.0f$m, ' % l_2 + '$b = %0.1f$m, ' % b + '$\\beta = %0.1f^{\circ}$' % beta)
+ax1.set_xlabel("encounter frequency [Hz]")
+ax1.set_ylabel('$F_{wp} [m^3/s]$')
+ax1.set_xlim([0, 12])
+ax1.legend()
+
+ax2.plot(frequencies_Hz, np.angle(f_wp_sesx), label='SES-X shape')
+#ax2.plot(frequencies_Hz, np.angle(f_wp_rect), label='Rectangle')
+ax2.set_xlabel("encounter frequency [Hz]")
 ax2.set_ylabel('Phase shift')
 ax2.set_xlim([0, 12])
 ax2.legend()
