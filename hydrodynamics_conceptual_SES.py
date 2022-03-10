@@ -14,12 +14,12 @@ mean free surface.
 # ------ Parameters -------
 # Main parameters of conceptual SES with rectangular side hulls
 L = 20  # [m] length of the vessel
-B = 10  # [m] total beam of the vessel
 b_G = 0.5  # [m] beam of side hulls (gondolas)
 b_c = 7  # [m] beam of the air cushion/length between the side hulls
 h_hull = 2  # [m] distance from bottom of side hull to roof of air cushion
 d = 0.5  # [m] draught with excess pressure in the air cushion
 p_0 = 3500  # [Pa] excess pressure in the air cushion
+B = b_c + 2 * b_G  # [m] total beam of the vessel
 
 # ------- Physical parameters -------
 rho = 1025  # [kg/m^3] density of sea water
