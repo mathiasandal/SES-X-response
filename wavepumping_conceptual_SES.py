@@ -47,7 +47,7 @@ plt.ylim([np.min(np.abs(f_wp)[(wavelength > x_min) & (wavelength < x_max)]),
 save_plot = False
 if save_plot:
     plot_path = 'Results/Conceptual SES/wave pumping/'
-    plot_name = 'magnitude,L=%.0fm, ' % L + '$b_c=%.0fm, ' % b_c + 'beta=%0.1fdeg, ' % beta + 'zeta_a=%.0fm' % zeta_a \
+    plot_name = 'magnitude,L=%.0fm, ' % L + 'b_c=%.0fm, ' % b_c + 'beta=%0.1fdeg, ' % beta + 'zeta_a=%.0fm' % zeta_a \
                 + '.pdf'
     plt.savefig(plot_path + plot_name)
 plt.show()
