@@ -9,7 +9,7 @@ heading = 0  # [deg] wave heading
 zeta_a = 1  # [m] wave amplitude
 
 # Incoming wave properties
-frequencies = np.linspace(0.5, 200, 100000)  # [rad/s] wave frequencies
+frequencies = np.linspace(0.01, 200, 100000)  # [rad/s] wave frequencies
 k = np.power(frequencies, 2) / g  # [m^-1] wave number
 wavelength = np.divide(2 * np.pi, k)  # [m] wavelength
 frequencies_Hz = frequencies / 2 / np.pi  # [Hz] wave frequencies
@@ -33,23 +33,46 @@ x_max = 24
 # Define plot colors
 color_BBGreen = '#5cb16d'
 color_BBPurple = '#b15ca0'
+plt.rc('font', size=15)  # sets size
 
-# Plot amplitude and phase
-plt.plot(wavelength, np.abs(f_wp), label='Conceptual SES', color=color_BBGreen)
-plt.title('$\\beta = %0.1f^{\\circ}$, ' % beta + '$\\zeta_a = %.0f$ $[m]$' % zeta_a)
-plt.xlabel('$\\lambda [m]$')
-plt.ylabel('$\\left|\\hat{F}_{7}\\right|$ $[m^3/s]$')
-plt.xlim([x_min, x_max])
-plt.ylim([np.min(np.abs(f_wp)[(wavelength > x_min) & (wavelength < x_max)]),
-          np.max(np.abs(f_wp)[(wavelength > x_min) & (wavelength < x_max)]) + 1])
+# Plot amplitude against wavelength
+plot_wavelength = True
+if plot_wavelength:
+    plt.plot(wavelength, np.abs(f_wp), label='Conceptual SES', color=color_BBGreen)
+    plt.title('$\\beta = %0.1f^{\\circ}$, ' % beta + '$\\zeta_a = %.0f$ $[m]$' % zeta_a)
+    plt.xlabel('$\\lambda [m]$')
+    plt.ylabel('$\\left|\\hat{F}_{7}\\right|$ $[m^3/s]$')
+    plt.xlim([x_min, x_max])
+    plt.ylim([np.min(np.abs(f_wp)[(wavelength > x_min) & (wavelength < x_max)]),
+              np.max(np.abs(f_wp)[(wavelength > x_min) & (wavelength < x_max)]) + 1])
 
-save_plot = True
-if save_plot:
-    plot_path = 'Results/Conceptual SES/wave pumping/'
-    plot_name = 'magnitude,wavelength,beta=%0.1fdeg, ' % beta + 'zeta_a=%.0fm' % zeta_a \
-                + '.pdf'
-    plt.savefig(plot_path + plot_name)
-plt.show()
+    save_plot = True
+    if save_plot:
+        plot_path = 'Results/Conceptual SES/wave pumping/'
+        plot_name = 'magnitude,wavelength,beta=%0.1fdeg, ' % beta + 'zeta_a=%.0fm' % zeta_a + '.pdf'
+        plt.tight_layout()
+        plt.savefig(plot_path + plot_name)
+    plt.show()
+
+# Plot amplitude against frequency
+plot_wavelength = False
+if plot_wavelength:
+    plt.plot(frequencies, np.abs(f_wp), label='Conceptual SES', color=color_BBGreen)
+    plt.title('$\\beta = %0.1f^{\\circ}$, ' % beta + '$\\zeta_a = %.0f$ $[m]$' % zeta_a)
+    plt.xlabel('wave frequency [rad/s]')
+    plt.ylabel('$\\left|\\hat{F}_{7}\\right|$ $[m^3/s]$')
+    plt.xlim([x_min, x_max])
+    plt.ylim([np.min(np.abs(f_wp)[(frequencies > x_min) & (frequencies < x_max)]),
+              np.max(np.abs(f_wp)[(frequencies > x_min) & (frequencies < x_max)]) + 1])
+
+    save_plot = False
+    if save_plot:
+        plot_path = 'Results/Conceptual SES/wave pumping/'
+        plot_name = 'magnitude,frequency,beta=%0.1fdeg, ' % beta + 'zeta_a=%.0fm' % zeta_a + '.pdf'
+        plt.tight_layout()
+        plt.savefig(plot_path + plot_name)
+    plt.show()
+
 
 plt.plot(wavelength, np.angle(f_wp), yunits=degrees, label='Conceptual SES', color=color_BBPurple)
 plt.title('$\\beta = %0.1f^{\\circ}$, ' % beta + '$\\zeta_a = %.0f$ $[m]$' % zeta_a)

@@ -83,8 +83,8 @@ for i in range(n_frequencies):
         f_ex_1[j, i] = REFORCE[j, i, 0, 0] + 1j * IMFORCE[j, i, 0, 0]
 
 # compute wave pumping
-f_7_test = 1j*wave_pumping_rect(x_b, x_s, y_p, y_s, omega_e, beta)
-#f_7_test = np.ones([n_frequencies])*30
+#f_7_test = 1j*wave_pumping_rect(x_b, x_s, y_p, y_s, omega_e, beta)
+f_7_test = np.ones([n_frequencies])*30
 f_7_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_e, beta)
 
 f_7 = f_7_wp
