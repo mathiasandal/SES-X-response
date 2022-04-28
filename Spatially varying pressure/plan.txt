@@ -1,0 +1,29 @@
+How to build the program to include spatially varying pressure:
+
+Define input parameters.
+    - What are the input parameters?
+        - Loading condition
+            o Mass matrix
+            o Velocity
+            o Trim and draft
+                - Submergence at AP and FP
+            o Incident wave frequencies
+            o Wave spectrum(For linearizing leakage)
+        - Fan characteristics
+            o Mean air cushion pressure
+            o Slope at equilibrium
+        - Geometries
+            o Air cushion area
+                - Beam, width and height
+            o
+        - Hydrodynamic coefficients (From VERES)
+            o Added mass
+            o Wave radiation damping
+            o Hydrostatic restoring
+        - Physical constants
+            o Density of water
+            o Density of air
+            o Speed of sound
+            o Atmospheric pressure
+
+
