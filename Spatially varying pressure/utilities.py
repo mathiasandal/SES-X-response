@@ -211,7 +211,7 @@ def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to water waves
     """
-    return -1j*4*k_4/L * k * np.sin(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
+    return -4*k_4/L * k * np.sin(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
         1j*2*k_4/L * (k_2_AP*N_R_AP*np.exp(-1j*k*L/2) + k_2_FP*N_R_FP*np.exp(1j*k*L/2))
 
 # Computing constants used in derivation of equations
