@@ -67,7 +67,7 @@ def B_0j(j, b, L, p_0, dQdp_0, x_F, k_2_AP, k_2_FP, A_0_AP, A_0_FP, k_4):
     return k_4/L/b*(k_2_AP*A_0_AP + k_2_FP*A_0_FP - 2*p_0*dQdp_0*np.cos(j*np.pi/L * (x_F + L/2)))
 
 
-def A_3j(L, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def A_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude A_3j found in eq. (48) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -79,17 +79,17 @@ def A_3j(L, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP:
         [m/s] K_2 constant at FP
-    :param N_R_AP:
+    :param n_R_AP:
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP:
+    :param n_R_FP:
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to change heave DOF
     """
-    return 2 * k_4 / L * (k_2_AP * N_R_AP - k_2_FP * N_R_FP)
+    return 2 * k_4 / L * (k_2_AP * n_R_AP - k_2_FP * n_R_FP)
 
 
-def B_3j(L, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def B_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude B_3j found in eq. (49) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -108,10 +108,10 @@ def B_3j(L, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to change heave DOF
     """
-    return 2 * k_4 / L * (k_2_AP * N_R_AP + k_2_FP * N_R_FP)
+    return 2 * k_4 / L * (k_2_AP * n_R_AP + k_2_FP * n_R_FP)
 
 
-def A_5j(j, L, omega_e, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def A_5j(j, L, omega_e, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude A_5j found in eq. (50) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -134,10 +134,10 @@ def A_5j(j, L, omega_e, k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to change pitch DOF
     """
-    return 4*L*k_4/(j*np.pi)**2 * 1j * omega_e + k_4 * (k_2_AP * N_R_AP + k_2_FP * N_R_FP)
+    return 4*L*k_4/(j*np.pi)**2 * 1j * omega_e + k_4 * (k_2_AP * n_R_AP + k_2_FP * n_R_FP)
 
 
-def B_5j(k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def B_5j(k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude B_5j found in eq. (51) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -154,10 +154,10 @@ def B_5j(k_4, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to change pitch DOF
     """
-    return k_4 * (k_2_AP * N_R_AP - k_2_FP * N_R_FP)
+    return k_4 * (k_2_AP * n_R_AP - k_2_FP * n_R_FP)
 
 
-def A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude A_7j found in eq. (52) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -183,10 +183,10 @@ def A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
         Frequency dependent modal amplitude of odd mode j due to water waves
     """
     return -1j*4*k_4/L * k * np.cos(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
-        1j*2*k_4/L * (k_2_AP*N_R_AP*np.exp(-1j*k*L/2) - k_2_FP*N_R_FP*np.exp(1j*k*L/2))
+        1j*2*k_4/L * (k_2_AP*n_R_AP*np.exp(-1j*k*L/2) - k_2_FP*n_R_FP*np.exp(1j*k*L/2))
 
 
-def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
+def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     """
     Computes frequency dependent modal amplitude B_7j found in eq. (53) in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -212,10 +212,9 @@ def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, N_R_AP, N_R_FP):
         Frequency dependent modal amplitude of even mode j due to water waves
     """
     return -4*k_4/L * k * np.sin(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
-        1j*2*k_4/L * (k_2_AP*N_R_AP*np.exp(-1j*k*L/2) + k_2_FP*N_R_FP*np.exp(1j*k*L/2))
+        1j*2*k_4/L * (k_2_AP*n_R_AP*np.exp(-1j*k*L/2) + k_2_FP*n_R_FP*np.exp(1j*k*L/2))
 
 # Computing constants used in derivation of equations
-
 
 def K_1(rho_0, p_0, h_0, A_c, p_a=105325, gamma=1.4):
     """
@@ -342,3 +341,60 @@ def K_4(xi_j, h_0, omega_e, omega_j, c=343):
         Constant K_4 found in eq. (27)
     """
     return c**2 / h_0 / (-omega_e**2 + 2*xi_j*omega_j*1j*omega_e + omega_j**2)
+
+# Help functions used for calculation of the linearized variable leakage
+
+
+def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53, rho_a=1.225):
+    """
+    Solves linear system of equations for mean value relation in eq. (3.27) in Steen (1993) 'Cobblestone effect on SES'
+    :param n_B_AP: (double)
+        [-] bias of quasi-linearized leakage area aft
+    :param n_B_FP: (double)
+        [-] bias of quasi-linearized leakage area at the bow
+    :param L: (double)
+        [m] Air cushion length
+    :param b: (double)
+        [m] Air cushion width
+    :param x_cp: (double)
+        [m] Coordinate from center of gravity of air cushion center in x-direction
+    :param A_c: (double)
+        [m^2] Air cushion area
+    :param p_0: (double)
+        [Pa] Mean cushion pressure
+    :param k_2: (double)
+        [m/s] K_2 constant at AP
+    :param k_3: (double)
+        K_3 constant eq. (27)
+    :param h_s_AP: (double)
+        [m] aft seal submergence
+    :param h_s_FP: (double)
+        [m] bow seal submergence
+    :param C_33: (double)
+        Restoring in heave due to heave motion
+    :param C_55: (double)
+        Restoring in pitch due to pitch motion
+    :param C_35: (double)
+        Restoring in heave due to pitch motion
+    :param C_53: (double)
+        Restoring in pitch due to heave motion
+    :param rho_a: (double)
+        [kg/m^3] Density of air at atmospheric pressure
+    :return: mu_3m (double), mu_5m (double)
+        [m] Mean value of heave, [rad] Mean value of pitch
+    """
+    # Define system of equations
+    a = np.array([[C_33, C_35, -A_c * p_0],
+                  [C_53, C_55, -x_cp * A_c * p_0],
+                  [rho_a*k_2*b*(n_B_AP + n_B_FP), rho_a*k_2*b*L/2*(n_B_AP - n_B_FP), k_3]])
+
+    f = np.array([0, 0, rho_a*k_2*b*(n_B_AP*h_s_AP + n_B_FP*h_s_FP)])
+
+    # Solve linear system of equations
+    x = np.linalg.solve(a, f)
+
+    mu_3m = x[0]  # [m] Mean value of heave
+    mu_5m = x[1]  # [rad] Mean value of pitch
+    #nu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
+
+    return mu_3m, mu_5m

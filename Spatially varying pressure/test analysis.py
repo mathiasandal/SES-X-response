@@ -7,7 +7,7 @@ c = 343  # [m/s] Speed of sound in air
 g = 9.81  # [m/s^2] Acceleration of gravity
 p_a = 101325  # [Pa] Atmospheric pressure
 rho_0 = 0  # [kg/m^3] Density of air at mean cushion pressure  # TODO: What is this value?
-rho_a = 0  # [kg/m^3] Density of air at atmospheric pressure # TODO: What is this value
+rho_a = 1.225  # [kg/m^3] Density of air at atmospheric pressure # TODO: What is this value
 
 # SES main dimensions
 L_oa = 35  # [m] Length overall
