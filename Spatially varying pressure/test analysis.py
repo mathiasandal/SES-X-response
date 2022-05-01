@@ -1,4 +1,6 @@
-"""Implementation of analysis with spatially varying pressure with the same input as in """
+"""Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
+    Oscillations of an SES with Flexible Bag Aft Seal'
+"""
 
 # ***** Define input parameters *****
 
