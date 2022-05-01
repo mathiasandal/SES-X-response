@@ -1,3 +1,4 @@
+from scipy.stats import norm
 import numpy as np
 
 # Functions to calculate modal solution of Boundary value problem of the air cushion domain
@@ -398,3 +399,32 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2, k_3, h_
     #nu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
 
     return mu_3m, mu_5m
+
+
+
+def N_R(b_L, sigma_L):
+    """
+    Computes variable N_R in eq. (3.21) in Steen (1993) 'Cobblestone effect on SES'. Uses the normal distributed
+    cumulative density function from scipy.stats
+    :param b_L: (double)
+        Bias term of variable leakage
+    :param sigma_L: (double)
+        rms-value of the time dependent part of the variable leakage area
+    :return: (double)
+        [-] gain value of quasi-linearized variable leakage (always between 0 and 1)
+    """
+    return norm.cdf(b_L/sigma_L)
+
+
+def N_B(b_L, sigma_L):
+    """
+    Computes variable N_B in eq. (3.21) in Steen (1993) 'Cobblestone effect on SES'. Uses the normal distributed
+    probability and cumulative density function from scipy.stats
+    :param b_L: (double)
+        Bias term of variable leakage
+    :param sigma_L: (double)
+        rms-value of the time dependent part of the variable leakage area
+    :return: (double)
+        bias of the quasi-linearized leakage area (always between 0 and 1)
+    """
+    return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
