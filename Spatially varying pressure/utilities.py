@@ -428,3 +428,28 @@ def N_B(b_L, sigma_L):
         bias of the quasi-linearized leakage area (always between 0 and 1)
     """
     return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
+
+
+def PM_spectrum(omega, H_s, T_p, U_195=5, g=9.81):  # TODO: Make sure this is correct. Compare with other sources.
+    """
+    Computes the Pierson-Moskowitz spectrum at a given wave frequency and input parameters. # TODO: something suspicious here. Did not use H_s and T_p currently.
+    :param omega: (double)  # TODO: maybe this should be a vector?
+        Frequency of interest
+    :param H_s: (double)
+        [m] significant wave height
+    :param T_p: (double)
+        [s] peak wave period
+    :param U_195: (double)
+        [m/s] wind speed at a height of 19.5 m above the mean sea level
+    :param g: (double) default=9.81
+        [m/s^2] acceleration of gravity
+    :return: (double)
+        [-] Pierson-Moskowitz spectrum evaluated at a wave frequency of omega with the given input parameters.
+    """
+
+    # Constants in the Pierson-Moskowitz spectrum
+    alpha = 8.1e-3
+    beta = 0.74
+    omega_0 = g/U_195
+
+    return alpha * g**2/omega**5 * np.exp(-beta*(omega_0/omega)**4)
