@@ -430,26 +430,24 @@ def N_B(b_L, sigma_L):
     return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
 
 
-def PM_spectrum(omega, H_s, T_p, U_195=5, g=9.81):  # TODO: Make sure this is correct. Compare with other sources.
+def PM_spectrum(omega, H_s, T_p):
     """
-    Computes the Pierson-Moskowitz spectrum at a given wave frequency and input parameters. # TODO: something suspicious here. Did not use H_s and T_p currently.
-    :param omega: (double)  # TODO: maybe this should be a vector?
-        Frequency of interest
+    Computes the Pierson-Moskowitz spectrum at a given wave frequency and input parameters.
+    :param omega: (double) # TODO: maybe this should be a vector?
+        [rad/s] Frequency
     :param H_s: (double)
         [m] significant wave height
     :param T_p: (double)
         [s] peak wave period
-    :param U_195: (double)
-        [m/s] wind speed at a height of 19.5 m above the mean sea level
-    :param g: (double) default=9.81
-        [m/s^2] acceleration of gravity
     :return: (double)
         [-] Pierson-Moskowitz spectrum evaluated at a wave frequency of omega with the given input parameters.
     """
 
-    # Constants in the Pierson-Moskowitz spectrum
-    alpha = 8.1e-3
-    beta = 0.74
-    omega_0 = g/U_195
+    omega_1 = 2*np.pi*1.30 / T_p  # [rad/s] mean frequency
 
-    return alpha * g**2/omega**5 * np.exp(-beta*(omega_0/omega)**4)
+    # Computes constants of the spectrum
+    A = 0.11*H_s**2*omega_1**4
+    B = 0.44*omega_1**4
+
+    return A / omega**5 * np.exp(-B / omega**4)
+
