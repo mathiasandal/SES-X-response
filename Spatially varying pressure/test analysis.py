@@ -26,4 +26,5 @@ dQdp_0 = -140  # [m^2/2] Linear fan slope
 lcg_fan = 5.6  # [m] Longitudinal fan position (from CG)
 
 
-# Loading condition
+# Read hydrodynamic coefficients
+

@@ -480,3 +480,48 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
 
     return integrand.simpsons(integrand, omega_0s)
 
+
+def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_ap, A_c_AP=0):
+    """
+    Computes mean leakage area at AP from eq. (3.31) 'Cobblestone effect on SES'
+    :param L: (double)
+        [m] Air cushion length
+    :param b: (double)
+        [m] Air cushion beam
+    :param n_b_AP: (double)
+        [-] bias of quasi-linearized leakage area aft
+    :param eta_3m: (double)
+        [m] Mean value of heave
+    :param eta_5m: (double)
+        [rad] Mean value of pitch
+    :param h_s_ap: (double)
+        [m] aft seal submergence
+    :param A_c_AP: (double) default=0
+        [m^2] Mean leakage part independent of mean position
+    :return: (double)
+        Mean leakage area at AP
+    """
+    return b*n_b_AP*(eta_3m - h_s_ap + L/2*eta_5m) + A_c_AP
+
+
+def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_fp, A_c_FP=0):
+    """
+    Computes mean leakage area at AP from eq. (3.32) 'Cobblestone effect on SES'
+    :param L: (double)
+        [m] Air cushion length
+    :param b: (double)
+        [m] Air cushion beam
+    :param n_b_FP: (double)
+        [-] bias of quasi-linearized leakage area at the front
+    :param eta_3m: (double)
+        [m] Mean value of heave
+    :param eta_5m: (double)
+        [rad] Mean value of pitch
+    :param h_s_fp: (double)
+        [m] aft seal submergence
+    :param A_c_FP: (double) default=0
+        [m^2] Mean leakage part independent of mean position
+    :return: (double)
+        Mean leakage area at FP
+    """
+    return b*n_b_FP*(eta_3m - h_s_fp - L/2*eta_5m) + A_c_FP
