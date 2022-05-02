@@ -1,4 +1,4 @@
-from scipy.stats import norm
+from scipy.stats import norm, integrate
 import numpy as np
 
 # Functions to calculate modal solution of Boundary value problem of the air cushion domain
@@ -450,4 +450,33 @@ def PM_spectrum(omega, H_s, T_p):
     B = 0.44*omega_1**4
 
     return A / omega**5 * np.exp(-B / omega**4)
+
+
+def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81):
+    """
+    Computes integral in eq. (3.28) in Steen 'Cobblestone effect on SES' numerically using Simpsons rule.
+    :param x: (double)
+        Longitudinal position along the vessel
+    :param omega_0s: vector 1xn
+        Vector including circular frequency of the incident water waves
+    :param eta_3_amps: vector 1xn
+        Vector of heave amplitudes corresponding to the respective incident water waves
+    :param eta_5_amps: vector 1xn
+        Vector of pitch amplitudes corresponding to the respective incident water waves
+    :param H_s: (double)
+        [m] significant wave height
+    :param T_p: (double)
+        [s] peak wave period
+    :param zeta_a: (double) default=1
+        [m] wave amplitude
+    :return: vector 1xn
+        Returns sigma_L^2 in eq. (3.28) in Steen 'Cobblestone effect on SES'
+    """
+
+    k = np.divide(np.power(omega_0s, 2), g)  # computes wave number of water waves
+
+    integrand = np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*zeta_a*np.exp(1j*k*x), zeta_a)), 2) * \
+                PM_spectrum(omega_0s, H_s, T_p)
+
+    return integrand.simpsons(integrand, omega_0s)
 
