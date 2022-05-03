@@ -1,4 +1,5 @@
-from scipy.stats import norm, integrate
+from scipy.stats import norm
+from scipy import integrate
 import numpy as np
 
 # Functions to calculate modal solution of Boundary value problem of the air cushion domain
@@ -478,7 +479,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
     integrand = np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*zeta_a*np.exp(1j*k*x), zeta_a)), 2) * \
                 PM_spectrum(omega_0s, H_s, T_p)
 
-    return integrand.simpsons(integrand, omega_0s)
+    return integrate.simpsons(integrand, omega_0s)
 
 
 def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_ap, A_c_AP=0):
