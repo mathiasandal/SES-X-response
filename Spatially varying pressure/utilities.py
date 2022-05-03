@@ -177,9 +177,9 @@ def A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP: (double)
         [m/s] K_2 constant at FP
-    :param N_R_AP: (double)
+    :param n_R_AP: (double)
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP: (double)
+    :param n_R_FP: (double)
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to water waves
@@ -206,9 +206,9 @@ def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP: (double)
         [m/s] K_2 constant at FP
-    :param N_R_AP: (double)
+    :param n_R_AP: (double)
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP: (double)
+    :param n_R_FP: (double)
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to water waves
@@ -528,3 +528,18 @@ def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_FP, A_c_FP=0):
         Mean leakage area at FP
     """
     return b*n_b_FP*(eta_3m - h_s_FP - L/2*eta_5m) + A_c_FP
+
+
+def r_j(x, j, L):
+    """
+    Computes mode shape of order j evaluated at x
+    :param x: (double)
+        Longitudinal position along air cushion
+    :param j: (int)
+        Order of mode shape
+    :param L: (double)
+        [m] Air cushion length
+    :return: (double)
+        [-] Mode shape evaluated at x
+    """
+    return np.cos(j*np.pi/L*(x + L/2))
