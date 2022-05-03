@@ -397,11 +397,11 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
     # Solve linear system of equations
     x = np.linalg.solve(a, f)
 
-    mu_3m = x[0]  # [m] Mean value of heave
-    mu_5m = x[1]  # [rad] Mean value of pitch
-    #nu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
+    eta_3m = x[0]  # [m] Mean value of heave
+    eta_5m = x[1]  # [rad] Mean value of pitch
+    #mu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
 
-    return mu_3m, mu_5m
+    return eta_3m, eta_5m
 
 
 
@@ -484,7 +484,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
     return integrate.simpsons(integrand, omega_0s)
 
 
-def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_ap, A_c_AP=0):
+def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_AP, A_c_AP=0):
     """
     Computes mean leakage area at AP from eq. (3.31) 'Cobblestone effect on SES'
     :param L: (double)
@@ -497,17 +497,17 @@ def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_ap, A_c_AP=0):
         [m] Mean value of heave
     :param eta_5m: (double)
         [rad] Mean value of pitch
-    :param h_s_ap: (double)
+    :param h_s_AP: (double)
         [m] aft seal submergence
     :param A_c_AP: (double) default=0
         [m^2] Mean leakage part independent of mean position
     :return: (double)
         Mean leakage area at AP
     """
-    return b*n_b_AP*(eta_3m - h_s_ap + L/2*eta_5m) + A_c_AP
+    return b*n_b_AP*(eta_3m - h_s_AP + L/2*eta_5m) + A_c_AP
 
 
-def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_fp, A_c_FP=0):
+def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_FP, A_c_FP=0):
     """
     Computes mean leakage area at AP from eq. (3.32) 'Cobblestone effect on SES'
     :param L: (double)
@@ -520,11 +520,11 @@ def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_fp, A_c_FP=0):
         [m] Mean value of heave
     :param eta_5m: (double)
         [rad] Mean value of pitch
-    :param h_s_fp: (double)
+    :param h_s_FP: (double)
         [m] aft seal submergence
     :param A_c_FP: (double) default=0
         [m^2] Mean leakage part independent of mean position
     :return: (double)
         Mean leakage area at FP
     """
-    return b*n_b_FP*(eta_3m - h_s_fp - L/2*eta_5m) + A_c_FP
+    return b*n_b_FP*(eta_3m - h_s_FP - L/2*eta_5m) + A_c_FP
