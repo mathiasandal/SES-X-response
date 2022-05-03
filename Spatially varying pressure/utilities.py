@@ -347,7 +347,7 @@ def K_4(xi_j, h_0, omega_e, omega_j, c=343):
 # Help functions used for calculation of the linearized variable leakage
 
 
-def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53, rho_a=1.225):
+def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53, rho_a=1.225):
     """
     Solves linear system of equations for mean value relation in eq. (3.27) in Steen (1993) 'Cobblestone effect on SES'
     :param n_B_AP: (double)
@@ -364,8 +364,10 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2, k_3, h_
         [m^2] Air cushion area
     :param p_0: (double)
         [Pa] Mean cushion pressure
-    :param k_2: (double)
+    :param k_2_AP: (double)
         [m/s] K_2 constant at AP
+    :param k_2_FP: (double)
+        [m/s] K_2 constant at FP
     :param k_3: (double)
         K_3 constant eq. (27)
     :param h_s_AP: (double)
@@ -388,9 +390,9 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2, k_3, h_
     # Define system of equations
     a = np.array([[C_33, C_35, -A_c * p_0],
                   [C_53, C_55, -x_cp * A_c * p_0],
-                  [rho_a*k_2*b*(n_B_AP + n_B_FP), rho_a*k_2*b*L/2*(n_B_AP - n_B_FP), k_3]])
+                  [rho_a*b*(k_2_AP*n_B_AP + k_2_FP*n_B_FP), rho_a*b*L/2*(k_2_AP*n_B_AP - k_2_FP*n_B_FP), k_3]])
 
-    f = np.array([0, 0, rho_a*k_2*b*(n_B_AP*h_s_AP + n_B_FP*h_s_FP)])
+    f = np.array([0, 0, rho_a*b*(k_2_AP*n_B_AP*h_s_AP + k_2_FP*n_B_FP*h_s_FP)])
 
     # Solve linear system of equations
     x = np.linalg.solve(a, f)
