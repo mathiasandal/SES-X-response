@@ -473,7 +473,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
     :param zeta_a: (double) default=1
         [m] wave amplitude
     :return: vector 1xn
-        Returns sigma_L^2 in eq. (3.28) in Steen 'Cobblestone effect on SES'
+        Returns sigma_L in eq. (3.28) in Steen 'Cobblestone effect on SES'
     """
 
     k = np.divide(np.power(omega_0s, 2), g)  # computes wave number of water waves
@@ -481,7 +481,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
     integrand = np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*zeta_a*np.exp(1j*k*x), zeta_a)), 2) * \
                 PM_spectrum(omega_0s, H_s, T_p)
 
-    return integrate.simpsons(integrand, omega_0s)
+    return np.sqrt(integrate.simpsons(integrand, omega_0s))
 
 
 def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_AP, A_c_AP=0):
