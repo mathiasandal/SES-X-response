@@ -433,7 +433,7 @@ def N_B(b_L, sigma_L):
     return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
 
 
-def PM_spectrum(omega, H_s, T_p):
+def PM_spectrum(omega, H_s, T_p):  # TODO: Change to a modified wave spectrum
     """
     Computes the Pierson-Moskowitz spectrum at a given wave frequency and input parameters.
     :param omega: (double) # TODO: maybe this should be a vector?
@@ -543,3 +543,32 @@ def r_j(x, j, L):
         [-] Mode shape evaluated at x
     """
     return np.cos(j*np.pi/L*(x + L/2))
+
+
+def Zeta_a(omega_e):
+    # TODO: IMPLEMENT!
+    return 0
+
+
+def slove_linear_systems_of_eq(A_mat, f_vec):
+    """
+    Solves linear system of equations for several cases
+    :param A_mat: (3x3xn) array
+        Matrix containing
+    :param f_vec: (3xn) array
+
+    :return: (1xn) array, (1xn) array, (1xn) array
+        eta_3a, eta_5a, mu_ua
+    """
+    n = len(A_mat[0, 0, :])
+
+    x_vec = np.zeros([3, n], dtype=complex)
+
+    for i in range(n):  # solve linear system of equations for each frequency
+        x_vec[:, i] = np.linalg.solve(A_mat[:, :, i], f_vec[:, i])
+
+    eta_3a = x_vec[0, :]
+    eta_5a = x_vec[1, :]
+    mu_ua = x_vec[2, :]
+
+    return eta_3a, eta_5a, mu_ua
