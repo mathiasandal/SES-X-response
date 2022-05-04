@@ -1,11 +1,16 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
-    A_7j, B_0j, B_3j, B_5j, B_7j,  r_j, slove_linear_systems_of_eq
+    A_7j, B_0j, B_3j, B_5j, B_7j,  r_j, slove_linear_systems_of_eq, N_R, N_B, rms_leakage
 """Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
 """
 
 # ***** Define input parameters *****
+
+# Wave paramters
+H_s = 0.15  # [m] significant wave height
+T_p = 1.5  # [s] wave peak period
 
 # Physical constants
 c = 343  # [m/s] Speed of sound in air
@@ -31,8 +36,8 @@ x_F = 0  # [m]
 
 # Other parameters
 zeta_a = 1  # [m] wave amplitude
-h_s_AP = 0  # [m] aft seal submergence
-h_s_FP = 0  # [m] bow seal submergence
+h_s_AP = 1  # [m] aft seal submergence
+h_s_FP = 1  # [m] bow seal submergence
 x_g_AP = -L/2  # [m] position of leakage at AP relative to center of gravity
 x_g_FP = L/2  # [m] position of leakage at FP relative to center of gravity
 
@@ -82,12 +87,23 @@ n_R_FP = 0.5
 n_B_AP = 0.5
 n_B_FP = 0.5
 
+# Initialize values to contain RAOs of the current and previous step in the iteration process
+eta_3a = np.zeros([1, n_freq], dtype=complex)
+eta_5a = np.zeros([1, n_freq], dtype=complex)
+mu_ua = np.zeros([1, n_freq], dtype=complex)
+eta_3a_old = np.zeros([1, n_freq], dtype=complex)
+eta_5a_old = np.zeros([1, n_freq], dtype=complex)
+mu_ua_old = np.zeros([1, n_freq], dtype=complex)
+
 epsi = 1e-6  # [-] allowed error in stopping criteria for iteration process
 err = -1  # [-] initialize error variable to start while-loop
 counter = 0  # initialize counter in while-loop
+max_iter = 500  # maximum number of iterations
 
-while ((err > epsi) or (counter < 1)):
-    err = 0
+eta_3_test = []
+
+while ((err > epsi) or (counter < 2)) and (counter < max_iter):
+
     # Solve mean value relation
     eta_3m, eta_5m = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53)
     # Compute mean leakage area et AP and FP
@@ -221,10 +237,36 @@ while ((err > epsi) or (counter < 1)):
             # Wave excitation term
             f_vec[2, :] -= (-rho_0*p_0*dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)) * r_j(x_F, j, L) * zeta_a
 
+        # Solves linear system of equations for each frequency
         eta_3a, eta_5a, mu_ua = slove_linear_systems_of_eq(A_mat, f_vec)
 
-        counter += 1
+        eta_3_test.append(eta_3a[4])
 
-print(A_mat[0, 0, :])
+        if not counter == 0:  # compute error between current and previous if it is not the first iteration
+            err = np.amax([np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old)),
+                           np.abs(np.divide(eta_5a - eta_5a_old, eta_5a_old)),
+                           np.abs(np.divide(mu_ua - mu_ua_old, mu_ua_old))])
 
-print('Hei')
+        # Stores current solution for comparison in next iteration
+        eta_3a_old = eta_3a
+        eta_5a_old = eta_5a
+        mu_ua_old = mu_ua
+
+        counter += 1  # increment counter
+        print("Current iteration:", counter)
+        # Compute new value for bias and gain for the linearized leakage for the next iteration
+
+        b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
+        b_L_FP = eta_3m + L/2*eta_5m - h_s_AP
+        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
+        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
+
+        n_R_AP = N_R(b_L_AP, b_L_AP)
+        n_R_FP = N_R(b_L_FP, b_L_FP)
+        n_B_AP = N_B(b_L_AP, b_L_AP)
+        n_B_FP = N_B(b_L_FP, b_L_FP)
+
+plt.plot(np.abs(eta_3_test))
+plt.show()
+
+print("The iteration scheme converged after", counter, "iterations and the relative error was then", err)
