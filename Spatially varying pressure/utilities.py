@@ -18,8 +18,8 @@ def A_0j(j, b, L, p_0, dQdp_0, x_F, k_2_AP, k_2_FP, A_0_AP, A_0_FP, k_4):
     :param p_0: (double)
         [Pa] Mean cushion pressure
     :param dQdp_0: (double)
-        [m^2/s] Linear fan slope #TODO: need to check what unit to use
-    :param x_F:
+        [(m^3/s)/Pa] Linear fan slope
+    :param x_F: (double)
         [m] Longitudinal position of fan relative to geometrical center of air cushion
     :param k_2_AP: (double)
          [m/s] K_2 constant at AP
@@ -50,7 +50,7 @@ def B_0j(j, b, L, p_0, dQdp_0, x_F, k_2_AP, k_2_FP, A_0_AP, A_0_FP, k_4):
     :param p_0: (double)
         [Pa] Mean cushion pressure
     :param dQdp_0: (double)
-        [m^2/s] Linear fan slope #TODO: need to check what unit to use
+        [(m^3/s)/Pa] Linear fan slope
     :param x_F:
         [m] Longitudinal position of fan relative to geometrical center of air cushion
     :param k_2_AP: (double)
@@ -103,9 +103,9 @@ def B_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP: (double)
         [m/s] K_2 constant at FP
-    :param N_R_AP: (double)
+    :param n_R_AP: (double)
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP: (double)
+    :param n_R_FP: (double)
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to change heave DOF
@@ -129,9 +129,9 @@ def A_5j(j, L, omega_e, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP: (double)
         [m/s] K_2 constant at FP
-    :param N_R_AP: (double)
+    :param n_R_AP: (double)
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP: (double)
+    :param n_R_FP: (double)
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to change pitch DOF
@@ -149,9 +149,9 @@ def B_5j(k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
         [m/s] K_2 constant at AP
     :param k_2_FP: (double)
         [m/s] K_2 constant at FP
-    :param N_R_AP: (double)
+    :param n_R_AP: (double)
         [-] gain-value of quasi-linearized variable leakage area at aft (between 0 and 1)
-    :param N_R_FP: (double)
+    :param n_R_FP: (double)
         [-] gain-value of quasi-linearized variable leakage area at bow (between 0 and 1)
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to change pitch DOF
@@ -267,7 +267,7 @@ def K_3(rho_0, p_0, Q_0, dQdp_0):
     :param Q_0: (double)
         [m^3/s] Mean fan flow rate
     :param dQdp_0: (double)
-        [m^2/2] Linear fan slope
+        [(m^3/s)/Pa] Linear fan slope
     :return: (double)
         K_3 constant
     """
@@ -283,7 +283,7 @@ def Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, A_0_AP, A_0_FP, dQdp_0, x_F, 
     :param rho_0: (double)
         [kg/m^3] Density of air at mean cushion pressure
     :param p_0: (double)
-        [Pa] Mean cushion pressure #TODO: need to check what unit to use
+        [Pa] Mean cushion pressure
     :param h_0: (double)
         [m] Cushion height
     :param b: (double)
@@ -299,7 +299,7 @@ def Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, A_0_AP, A_0_FP, dQdp_0, x_F, 
     :param A_0_FP: (double)
         [m^2] Mean leakage area at FP
     :param dQdp_0: (double)
-        [m^2/s] Linear fan slope #TODO: need to check what unit to use
+        [(m^3/s)/Pa] Linear fan slope #TODO: need to check what unit to use
     :param x_F: (double)
         [m] Longitudinal position of fan relative to geometrical center of air cushion
     :param c: (double) default=343
@@ -550,7 +550,7 @@ def Zeta_a(omega_e):
     return 0
 
 
-def slove_linear_systems_of_eq(A_mat, f_vec):
+def solve_linear_systems_of_eq(A_mat, f_vec):
     """
     Solves linear system of equations for several cases
     :param A_mat: (3x3xn) array
@@ -560,15 +560,15 @@ def slove_linear_systems_of_eq(A_mat, f_vec):
     :return: (1xn) array, (1xn) array, (1xn) array
         eta_3a, eta_5a, mu_ua
     """
-    n = len(A_mat[0, 0, :])
+    n = len(A_mat[0, 0, :])  # number of frequencies
 
-    x_vec = np.zeros([3, n], dtype=complex)
+    x_vec = np.zeros([3, n], dtype=complex)  # initialize vector to contain solution of linear system of equations
 
     for i in range(n):  # solve linear system of equations for each frequency
         x_vec[:, i] = np.linalg.solve(A_mat[:, :, i], f_vec[:, i])
 
-    eta_3a = x_vec[0, :]
-    eta_5a = x_vec[1, :]
-    mu_ua = x_vec[2, :]
+    eta_3a = x_vec[0, :]  # Heave RAO
+    eta_5a = x_vec[1, :]  # Pitch RAO
+    mu_ua = x_vec[2, :]  # Uniform pressure RAO
 
     return eta_3a, eta_5a, mu_ua
