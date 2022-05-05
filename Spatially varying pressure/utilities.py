@@ -546,7 +546,18 @@ def r_j(x, j, L):
 
 
 def Zeta_a(omega_0, H_s, T_p):
-
+    """
+    Returns the wave amplitudes related to the PM spectrum with the given input parameters H_s and T_p to the selected
+    frequencies.
+    :param omega_0: vector 1xn
+        Vector including circular frequency of the incident water waves
+    :param H_s: (double)
+        [m] significant wave height
+    :param T_p: (double)
+        [s] peak wave period
+    :return: (1xn) array
+        [m] Returns a vector containing wave amplitudes related to each frequency in the wave spectrum
+    """
     delta_omega_0 = np.diff(omega_0)
     delta_omega_0 = np.concatenate(([delta_omega_0[0]], delta_omega_0))
 
