@@ -51,7 +51,7 @@ def B_0j(j, b, L, p_0, dQdp_0, x_F, k_2_AP, k_2_FP, A_0_AP, A_0_FP, k_4):
         [Pa] Mean cushion pressure
     :param dQdp_0: (double)
         [(m^3/s)/Pa] Linear fan slope
-    :param x_F:
+    :param x_F: (double)
         [m] Longitudinal position of fan relative to geometrical center of air cushion
     :param k_2_AP: (double)
          [m/s] K_2 constant at AP
@@ -545,9 +545,12 @@ def r_j(x, j, L):
     return np.cos(j*np.pi/L*(x + L/2))
 
 
-def Zeta_a(omega_e):
-    # TODO: IMPLEMENT!
-    return 0
+def Zeta_a(omega_0, H_s, T_p):
+
+    delta_omega_0 = np.diff(omega_0)
+    delta_omega_0 = np.concatenate(([delta_omega_0[0]], delta_omega_0))
+
+    return np.sqrt(2 * np.multiply(PM_spectrum(omega_0, H_s, T_p), delta_omega_0))
 
 
 def solve_linear_systems_of_eq(A_mat, f_vec):
