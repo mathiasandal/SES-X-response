@@ -432,26 +432,23 @@ def N_B(b_L, sigma_L):
     return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
 
 
-def PM_spectrum(omega, H_s, T_p):  # TODO: Change to a modified wave spectrum
+def PM_spectrum(omega_0, H_s, T_p):  # TODO: Change to a modified wave spectrum
     """
-    Computes the Pierson-Moskowitz spectrum at a given wave frequency and input parameters.
-    :param omega: (double) # TODO: maybe this should be a vector?
+    Computes the modified Pierson-Moskowitz spectrum at a given wave frequency and input parameters.
+    Source: https://www.orcina.com/webhelp/OrcaFlex/Content/html/Waves,Wavespectra.htm#:~:text=The%20ISSC%20spectrum%20(
+    also%20known,Hs%2C%20are%20data%20items.
+    :param omega_0: (1xn) vector
         [rad/s] Frequency
     :param H_s: (double)
         [m] significant wave height
     :param T_p: (double)
         [s] peak wave period
     :return: (double)
-        [-] Pierson-Moskowitz spectrum evaluated at a wave frequency of omega with the given input parameters.
+        [-] modified Pierson-Moskowitz spectrum evaluated at a wave frequency of omega with the given input parameters.
     """
 
-    omega_1 = 2*np.pi*1.30 / T_p  # [rad/s] mean frequency
-
-    # Computes constants of the spectrum
-    A = 0.11*H_s**2*omega_1**4
-    B = 0.44*omega_1**4
-
-    return A / omega**5 * np.exp(-B / omega**4)
+    return 5/16 * (2*np.pi)**2 * H_s**2 * T_p**-4 * \
+           np.multiply(np.power(omega_0, -5), np.exp(-5/4*(T_p/2/np.pi)**-4 * np.power(omega_0, -4)))
 
 
 def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
