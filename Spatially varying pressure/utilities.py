@@ -468,6 +468,8 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
         [s] peak wave period
     :param zeta_a: vector (1xn)
         [m] wave amplitude
+    :param g: (double) default=9.81
+        [m/s^2] Acceleration of gravity
     :return: vector 1xn
         Returns sigma_L in eq. (3.28) in Steen 'Cobblestone effect on SES'
     """
@@ -539,6 +541,106 @@ def r_j(x, j, L):
     """
     return np.cos(j*np.pi/L*(x + L/2))
 
+'''
+def append_spatially_varying_terms(A, f, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan, k_2_AP, a_0_AP, x_g_AP,
+                                   k_2_FP, a_0_FP, x_g_FP, zeta_a, a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j,
+                                   rho_a=101325):
+
+    if j % 2 == 1:  # if j is odd
+        # ***** Pitching moments due to spatially varying pressure in eq. (88) in Steen and Faltinsen (1995)
+        # Heave DOF
+        A[1, 0, :] += 2 * rho_0 * b * 1j * (L / j / np.pi) ** 2 * np.multiply(omega_e, a_3j)
+
+        # Pitch DOF
+        A[1, 1, :] += 2 * rho_0 * b * 1j * (L / j / np.pi) ** 2 * np.multiply(omega_e, a_5j)
+
+        # Uniform pressure DOF
+        A[1, 2, :] += 2 * rho_0 * b * 1j * (L / j / np.pi) ** 2 * np.multiply(omega_e, a_0j)
+
+        # Wave excitation term
+        f[1, :] -= 2 * rho_0 * b * 1j * (L / j / np.pi) ** 2 * np.multiply(np.multiply(omega_e, a_7j), zeta_a)
+
+        # ***** Terms from leakage at AP in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_3j) * r_j(x_g_AP, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_5j) * r_j(x_g_AP, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_0j) * r_j(x_g_AP, j, L)
+
+        # Wave excitation term
+        f[2, :] -= rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, a_7j) * r_j(x_g_AP, j, L), zeta_a)
+
+        # ***** Terms from leakage at FP in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_3j) * r_j(x_g_FP, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_5j) * r_j(x_g_FP, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_0j) * r_j(x_g_FP, j, L)
+
+        # Wave excitation term
+        f[2, :] -= rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, a_7j) * r_j(x_g_FP, j, L), zeta_a)
+
+        # ***** Terms from fan inlet at lcg_fan in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_3j) * r_j(lcg_fan, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_5j) * r_j(lcg_fan, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, a_0j) * r_j(lcg_fan, j,  L)
+
+        # Wave excitation term
+        f[2, :] -= (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, a_7j) * r_j(lcg_fan, j, L), zeta_a)
+
+    elif j % 2 == 0:  # if j is even
+        # ***** Terms from leakage at AP in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_3j) * r_j(x_g_AP, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_5j) * r_j(x_g_AP, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_0j) * r_j(x_g_AP, j, L)
+
+        # Wave excitation term
+        f[2, :] -= rho_a * k_2_AP / 2 * a_0_AP * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(x_g_AP, j, L), zeta_a)
+
+        # ***** Terms from leakage at FP in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_3j) * r_j(x_g_FP, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_5j) * r_j(x_g_FP, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_0j) * r_j(x_g_FP, j, L)
+
+        # Wave excitation term
+        f[2, :] -= rho_a * k_2_FP / 2 * a_0_FP * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(x_g_FP, j, L), zeta_a)
+
+        # ***** Terms from fan inlet at x_F in eq. (82) in Steen and Faltinsen (1995) *****
+        # Heave DOF
+        A[2, 0, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_3j) * r_j(lcg_fan, j, L)
+
+        # Pitch DOF
+        A[2, 1, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_5j) * r_j(lcg_fan, j, L)
+
+        # Uniform pressure DOF
+        A[2, 2, :] += (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(omega_e, b_0j) * r_j(lcg_fan, j, L)
+
+        # Wave excitation term
+        f[2, :] -= (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(lcg_fan, j, L), zeta_a)
+
+    return A, f
+'''
 
 def Zeta_a(omega_0, H_s, T_p):
     """
