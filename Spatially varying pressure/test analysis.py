@@ -50,26 +50,26 @@ x_g_FP = L/2  # [m] position of leakage at FP relative to center of gravity
 
 # Derived parameters
 A_c = L*b  # [m^2] Air cushion area  # TODO: Might want to use expression for rectangular cushion shape with triangle at the front
-x_cp = -10  # [m] longitudinal centroid of air cushion
+x_cp = 10  # [m] longitudinal centroid of air cushion
 
 # ***** Read hydrodynamic coefficients *****
 # TODO: Temporarily set to 10. Need to read them in correctly
-A_33 = 10
+A_33 = 1000
 B_33 = 10
-C_33 = 10
+C_33 = 100
 
 A_35 = 10
 B_35 = 10
-C_35 = 10
+C_35 = 1000
 
 A_53 = 10
 B_53 = 10
 C_53 = 10
 
-I_55 = 10
+I_55 = 1000
 A_55 = 10
 B_55 = 10
-C_55 = 10
+C_55 = 100000
 
 # Excitation
 F_3a = 0  # TODO: to be filled in
@@ -271,8 +271,8 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
 
         b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
         b_L_FP = eta_3m - L/2*eta_5m - h_s_FP
-        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
-        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
+        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
+        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
 
         n_R_AP = N_R(b_L_AP, b_L_AP)
         n_R_FP = N_R(b_L_FP, b_L_FP)

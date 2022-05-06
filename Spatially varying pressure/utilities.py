@@ -404,7 +404,6 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
     return eta_3m, eta_5m
 
 
-
 def N_R(b_L, sigma_L):
     """
     Computes variable N_R in eq. (3.21) in Steen (1993) 'Cobblestone effect on SES'. Uses the normal distributed
@@ -455,14 +454,14 @@ def PM_spectrum(omega, H_s, T_p):  # TODO: Change to a modified wave spectrum
     return A / omega**5 * np.exp(-B / omega**4)
 
 
-def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81):
+def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
     """
     Computes integral in eq. (3.28) in Steen 'Cobblestone effect on SES' numerically using Simpsons rule.
     :param x: (double)
         Longitudinal position along the vessel
-    :param omega_0s: vector 1xn
+    :param omega_0s: vector (1xn)
         Vector including circular frequency of the incident water waves
-    :param eta_3_amps: vector 1xn
+    :param eta_3_amps: vector (1xn)
         Vector of heave amplitudes corresponding to the respective incident water waves
     :param eta_5_amps: vector 1xn
         Vector of pitch amplitudes corresponding to the respective incident water waves
@@ -470,7 +469,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
         [m] significant wave height
     :param T_p: (double)
         [s] peak wave period
-    :param zeta_a: (double) default=1
+    :param zeta_a: vector (1xn)
         [m] wave amplitude
     :return: vector 1xn
         Returns sigma_L in eq. (3.28) in Steen 'Cobblestone effect on SES'
@@ -478,8 +477,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1, g=9.81)
 
     k = np.divide(np.power(omega_0s, 2), g)  # computes wave number of water waves
 
-    integrand = np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*zeta_a*np.exp(1j*k*x), zeta_a)), 2) * \
-                PM_spectrum(omega_0s, H_s, T_p)
+    integrand = np.multiply(np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*np.multiply(zeta_a, np.exp(1j*k*x)), zeta_a)), 2), PM_spectrum(omega_0s, H_s, T_p))
 
     return np.sqrt(integrate.simpson(integrand, omega_0s))
 
