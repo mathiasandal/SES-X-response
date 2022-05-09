@@ -475,8 +475,15 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
     """
 
     k = np.divide(np.power(omega_0s, 2), g)  # computes wave number of water waves
+    wave_spectrum = PM_spectrum(omega_0s, H_s, T_p)
 
-    integrand = np.multiply(np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*np.multiply(zeta_a, np.exp(1j*k*x)), zeta_a)), 2), PM_spectrum(omega_0s, H_s, T_p))
+    integrand = np.zeros([len(k)])
+
+    for i in range(len(k)):
+        if zeta_a[i] > 0.0:
+            integrand[i] = np.power((np.abs(eta_3_amps[i] - x*eta_5_amps[i] + 1j*zeta_a[i]*np.exp(1j*k[i]*x))/zeta_a[i]), 2)*wave_spectrum[i]
+
+    #integrand2 = np.multiply(np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*np.multiply(zeta_a, np.exp(1j*k*x)), zeta_a)), 2), PM_spectrum(omega_0s, H_s, T_p))
 
     return np.sqrt(integrate.simpson(integrand, omega_0s))
 

@@ -13,6 +13,13 @@ from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relati
 # Wave parameters
 H_s = 0.15  # [m] significant wave height
 T_p = 1.5  # [s] wave peak period
+plotWaveSpectrum = True
+
+if plotWaveSpectrum:
+    frequencies_PM = np.linspace(0, 16)
+    U_PM = 50*0.514444
+    omega_e_PM = 2*np.pi*frequencies_PM
+
 
 # Physical constants
 c = 343.  # [m/s] Speed of sound in air
@@ -57,7 +64,7 @@ x_cp = 4  # [m] longitudinal centroid of air cushion relative to CoG(?)  #TODO: 
 # ***** Read hydrodynamic coefficients for conceptual SES *****
 
 # Fetch hydrodynamic coefficients and loads
-path = 'C:/Users/mathi/code/repos/SES-X-response/Input files/Conceptual SES/without air cushion/'
+path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/Run 1 (0.1-16 [Hz])/'
 path_re7 = path + 'input.re7'
 path_re8 = path + 'input.re8'
 
@@ -107,12 +114,13 @@ F_5a = f_ex[4, :]
 #omega_0 = np.linspace(1, 10, 1000)
 omega_0 = FREQ_re7
 k = np.power(omega_0, 2)/g  # wave number of water waves
-omega_e = omega_0 + np.power(omega_0, 2)/g*U*0.514444  # encounter frequencies
+omega_e = omega_0 + np.power(omega_0, 2)/g*U  # encounter frequencies
 f_encounter = omega_e/2/np.pi  # [Hz] frequency of encounter
 n_freq = len(omega_e)
 
 # TODO: Make sure that zeta_a is treated correctly in all functions and expressions
 zeta_a = Zeta_a(omega_0, H_s, T_p)  # [m] wave amplitude dependent on encounter frequency
+#zeta_a = np.ones([len(omega_0)])
 
 # ***** Compute wave pumping *****
 F_wp = rho_0 * A_c * np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)) * zeta_a
