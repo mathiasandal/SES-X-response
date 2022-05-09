@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from veres import read_re8_file, read_re7_file
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
-    A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a
+    A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
+    append_spatially_varying_terms
 """Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
 """
@@ -178,8 +179,8 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[2, 2, :] = k_1 * 1j * omega_e + k_3
     f_vec[2, :] = F_wp - rho_a * b * 1j * (k_2_AP*n_R_AP * np.exp(-1j * k * L/2) + k_2_FP*n_R_FP * np.exp(1j * k * L/2))
 
-    A_mat_2 = A_mat
-    f_vec_2 = f_vec
+    #A_mat_2 = A_mat
+    #f_vec_2 = f_vec
 
     # ***** Fill in terms due to spatially varying pressure *****
     for j in range(1, j_max + 1):
@@ -205,17 +206,19 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
 
 
         '''
-        A_mat_2, f_vec_2 = append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
+        append_spatially_varying_terms(A_mat, f_vec, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
                                                       k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
                                                       a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        A_mat_2, f_vec_2 = append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
+        
+        append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
                                                         k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
                                                         a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        A_mat_2, f_vec_2 = append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
+        append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
                                                         k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
                                                         a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
         '''
-
+        '''
+        '''
 
         if j % 2 == 1:  # if j is odd
             # ***** Pitching moments due to spatially varying pressure in eq. (88) in Steen and Faltinsen (1995)
