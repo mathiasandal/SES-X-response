@@ -1,15 +1,14 @@
 import numpy as np
 
-a = np.ones([2, 2, 4])
+a = np.ones([2, 2])
 
 
-b = 4*np.ones([2, 2])
+def my_func(mat):
+    mat[0, 0] = 10
 
-c = a.append(b)
+my_func(a)
 
-
-
-print(c)
+print(a)
 
 
 

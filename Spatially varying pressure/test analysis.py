@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from veres import read_re8_file, read_re7_file
+from veres import read_re8_file, read_re7_file, read_group_of_re7_input, read_group_of_re8_input
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
     A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
-    append_spatially_varying_terms
+    append_spatially_varying_terms, PM_spectrum
 """Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
 """
@@ -13,13 +13,6 @@ from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relati
 # Wave parameters
 H_s = 0.15  # [m] significant wave height
 T_p = 1.5  # [s] wave peak period
-plotWaveSpectrum = True
-
-if plotWaveSpectrum:
-    frequencies_PM = np.linspace(0, 16)
-    U_PM = 50*0.514444
-    omega_e_PM = 2*np.pi*frequencies_PM
-
 
 # Physical constants
 c = 343.  # [m/s] Speed of sound in air
@@ -64,21 +57,28 @@ x_cp = 4  # [m] longitudinal centroid of air cushion relative to CoG(?)  #TODO: 
 # ***** Read hydrodynamic coefficients for conceptual SES *****
 
 # Fetch hydrodynamic coefficients and loads
-path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/Run 1 (0.1-16 [Hz])/'
+path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
 path_re7 = path + 'input.re7'
 path_re8 = path + 'input.re8'
 
 
 # Read input.re7 file to get hydrodynamic coefficients
-M, A_n, B_n, C_n, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_re7_file(path_re7)
+'''
+M, A_n, B_n, C_n, VEL_re7, HEAD_re7, FREQ_re7_test, XMTN_re7_test, ZMTN_re7_test, NDOF_test = read_re7_file(path_re7)
 
 # Clean up matrices
-A_temp = A_n[0, 0, :, :, :]
-B_temp = B_n[0, 0, :, :, :]
-C_temp = C_n[0, 0, :, :, :]
+A_test = A_n[0, 0, :, :, :]
+B_test = B_n[0, 0, :, :, :]
+C_test = C_n[0, 0, :, :, :]
+'''
+
+M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input('C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]')
 
 # Read input.re8 file to get excitation
-REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
+f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input('C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]')
+
+#REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
+
 n_freq = len(FREQ_re8)
 
 A_33 = A_temp[:, 2, 2]
@@ -102,11 +102,13 @@ C_55 = C_temp[n_freq//2, 4, 4]
 # Excitation
 # initialize array to contain complex force amplitudes
 
+'''
 f_ex = np.zeros([6, n_freq], dtype=complex)
 
 for i in range(6):
     for j in range(n_freq):
         f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
+'''
 
 F_3a = f_ex[2, :]
 F_5a = f_ex[4, :]
@@ -118,7 +120,6 @@ omega_e = omega_0 + np.power(omega_0, 2)/g*U  # encounter frequencies
 f_encounter = omega_e/2/np.pi  # [Hz] frequency of encounter
 n_freq = len(omega_e)
 
-# TODO: Make sure that zeta_a is treated correctly in all functions and expressions
 zeta_a = Zeta_a(omega_0, H_s, T_p)  # [m] wave amplitude dependent on encounter frequency
 #zeta_a = np.ones([len(omega_0)])
 
@@ -151,7 +152,7 @@ mu_ua_old = np.zeros([1, n_freq], dtype=complex)
 epsi = 1e-6  # [-] allowed error in stopping criteria for iteration process
 err = -1  # [-] initialize error variable to start while-loop
 counter = 0  # initialize counter in while-loop
-max_iter = 500  # maximum number of iterations
+max_iter = 100  # maximum number of iterations
 
 eta_3_test = []
 
@@ -187,9 +188,6 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[2, 2, :] = k_1 * 1j * omega_e + k_3
     f_vec[2, :] = F_wp - rho_a * b * 1j * (k_2_AP*n_R_AP * np.exp(-1j * k * L/2) + k_2_FP*n_R_FP * np.exp(1j * k * L/2))
 
-    #A_mat_2 = A_mat
-    #f_vec_2 = f_vec
-
     # ***** Fill in terms due to spatially varying pressure *****
     for j in range(1, j_max + 1):
 
@@ -197,8 +195,6 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
         xi_j = Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, a_0_AP, a_0_FP, dQdp_0, lcg_fan)  # [-] Relative damping ratio of mode j  # TODO check if I should use lcg_fan instead of x_F
         omega_j = Omega_j(j, L)
         k_4 = K_4(xi_j, h_0, omega_e, omega_j)
-
-        # TODO: Compute A_0j(omega_e) and B_0j(omega_e) amplitudes beforehand(?)
 
         # Frequency dependent modal amplitudes for odd acoustic modes
         a_0j = A_0j(j, b, L, p_0, dQdp_0, lcg_fan, k_2_AP, k_2_FP, a_0_AP, a_0_FP, k_4)
@@ -212,20 +208,14 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
         b_5j = B_5j(k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         b_7j = B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
 
+        '''
+        # Deep copy for debugging
+        temp_mat = A_mat.copy()
+        temp_vec = f_vec.copy()
 
-        '''
-        append_spatially_varying_terms(A_mat, f_vec, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
-                                                      k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
-                                                      a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        
-        append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
-                                                        k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
-                                                        a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        append_spatially_varying_terms(A_mat_2, f_vec_2, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan,
-                                                        k_2_AP, a_0_AP, x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a,
-                                                        a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        '''
-        '''
+        ''''''
+        append_spatially_varying_terms(temp_mat, temp_vec, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan, k_2_AP, a_0_AP
+                                       , x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a, a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
         '''
 
         if j % 2 == 1:  # if j is odd
@@ -322,8 +312,14 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
             f_vec[2, :] -= (-rho_0*p_0*dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(lcg_fan, j, L), zeta_a)
 
         '''
-        print(np.size(A_mat == A_mat_2) - np.count_nonzero(A_mat == A_mat_2))
-        print(np.size(f_vec == f_vec_2) - np.count_nonzero(f_vec == f_vec_2))
+        test_mat = temp_mat - A_mat
+        test_vec = temp_vec - f_vec
+
+        print('Compare matrices:')
+        print(temp_mat == A_mat)
+        print('Compare vector:')
+        print(temp_vec == f_vec)
+        print('hei')
         '''
 
         # Solves linear system of equations for each frequency
@@ -355,11 +351,27 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
         n_B_FP = N_B(b_L_FP, b_L_FP)
 
 
-plt.plot(f_encounter, np.abs(eta_3a),  label='eta_3')
-plt.plot(f_encounter, np.abs(eta_5a),  label='eta_5')
-plt.plot(f_encounter, np.abs(mu_ua),  label='mu_ua')
+plt.plot(f_encounter, np.abs(eta_3a), 'x-', label='$\\eta_3$')
+plt.plot(f_encounter, np.abs(eta_5a), 'x-',  label='$\\eta_5$')
+plt.plot(f_encounter, np.abs(mu_ua), 'x-',  label='$\\mu_{ua}$')
 plt.xlabel('Encounter frequency [Hz]')
 plt.legend()
 plt.show()
+
+# Plotting wave spectrum
+plotWaveSpectrum = True
+if plotWaveSpectrum:
+
+    f_e_PM = np.linspace(0.1, 50, 1000)
+    omega_0_PM = g/2/U*(np.sqrt(1 + 8*np.pi*U/g*f_e_PM) - 1)
+    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
+
+    #plt.plot(f_encounter, PM_spectrum(omega_0, H_s, T_p))
+    plt.xlabel('Encounter frequency [Hz]')
+    plt.ylabel('$S_{\\zeta}$')
+    plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
+    plt.show()
+
+    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
 
 print("The iteration scheme converged after", counter, "iterations and the relative error was then", err)

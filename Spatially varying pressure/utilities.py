@@ -549,12 +549,9 @@ def r_j(x, j, L):
     return np.cos(j*np.pi/L*(x + L/2))
 
 ''''''
-def append_spatially_varying_terms(A_mat, f_vec, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan, k_2_AP, a_0_AP, x_g_AP,
+def append_spatially_varying_terms(A, f, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan, k_2_AP, a_0_AP, x_g_AP,
                                    k_2_FP, a_0_FP, x_g_FP, zeta_a, a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j,
                                    rho_a=101325):
-    # Deep copy arrays
-    A = A_mat.copy()
-    f = f_vec.copy()
 
     if j % 2 == 1:  # if j is odd
         # ***** Pitching moments due to spatially varying pressure in eq. (88) in Steen and Faltinsen (1995)
@@ -648,8 +645,8 @@ def append_spatially_varying_terms(A_mat, f_vec, omega_e, j, b, L, rho_0, p_0, d
 
         # Wave excitation term
         f[2, :] -= (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(lcg_fan, j, L), zeta_a)
-
-    #return A, f
+    ''''''
+    return
 
 
 def Zeta_a(omega_0, H_s, T_p):
