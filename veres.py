@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg as la
 import pandas as pd
+from pathlib import Path
 from air_cushion import find_closest_value
 from Wave_response_utilities import add_row_and_column, decouple_matrix
 
@@ -410,6 +411,71 @@ def read_veres_input(path):
 
     return A_h, B_h, C_h, F_ex_real, F_ex_im, VEL, HEAD, FREQ, XMTN, ZMTN
 
+
+def read_group_of_re7_input(filepath):
+
+    if not Path(filepath + '/Run ' + str(1) + '/input.re7').is_file():
+        return
+
+    M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, NDOF = \
+        read_re7_file(filepath + '/Run ' + str(1) + '/input.re7')
+
+    # Clean up matrices
+    A = A_temp[0, 0, :, :, :]
+    B = B_temp[0, 0, :, :, :]
+    C = C_temp[0, 0, :, :, :]
+    omega_0 = FREQ_temp
+
+    counter = 2
+
+    while Path(filepath + '/Run ' + str(counter) + '/input.re7').is_file():
+
+        M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, NDOF = \
+            read_re7_file(filepath + '/Run ' + str(counter) + '/input.re7')
+
+        # Append hydrodynamic coefficients and frequencies
+        A = np.vstack((A_temp[0, 0, :, :, :].copy(), A))
+        B = np.vstack((B_temp[0, 0, :, :, :].copy(), B))
+        C = np.vstack((C_temp[0, 0, :, :, :].copy(), C))
+        omega_0 = np.append(FREQ_temp.copy(), omega_0)
+
+        counter += 1  # Increment for next iteration
+
+    return M, A, B, C, VEL, HEAD, omega_0, XMTN, ZMTN, NDOF
+
+
+def read_group_of_re8_input(filepath):
+    if not Path(filepath + '/Run ' + str(1) + '/input.re8').is_file():
+        return
+
+    REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN = \
+        read_re8_file(filepath + '/Run ' + str(1) + '/input.re8')
+
+    f_ex = np.zeros([6, len(FREQ_temp)], dtype=complex)
+    omega_0 = FREQ_temp
+
+    for i in range(6):
+        for j in range(len(FREQ_temp)):
+            f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
+
+    counter = 2
+
+    while Path(filepath + '/Run ' + str(counter) + '/input.re8').is_file():
+        REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN = \
+            read_re8_file(filepath + '/Run ' + str(counter) + '/input.re8')
+
+        f_ex_temp = np.zeros([6, len(FREQ_temp)], dtype=complex)
+
+        for i in range(6):
+            for j in range(len(FREQ_temp)):
+                f_ex_temp[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
+
+        f_ex = np.hstack((f_ex_temp.copy(), f_ex))
+        omega_0 = np.append(FREQ_temp.copy(), omega_0)
+
+        counter += 1  # Increment for next iteration
+
+    return f_ex, VEL, HEAD, omega_0, XMTN, ZMTN
 
 def interpolate_matrices(omega, omega_lower, omega_upper, mat_lower, mat_upper):
     """
