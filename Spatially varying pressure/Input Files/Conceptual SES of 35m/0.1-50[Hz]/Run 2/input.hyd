@@ -1,0 +1,39 @@
+99
+DATA-CHECK PROPERTIES
+Run name:  Run 2
+
+Ship name: conceptual_35m_contour_imported
+Loading condition description:  Design waterline
+
+ShipX exported data
+Main dimensions (from input):
+______________________________________________________________
+
+Length between perpendiculars    (m)     35.000
+Breadth                          (m)      9.000
+Draught, midship                 (m)      0.702
+Sinkage                          (m)      0.000
+Trim, + = aft                  (deg)      0.000
+______________________________________________________________
+
+Number of hulls:   2  -> Catamaran
+
+Coefficients for data check etc.:
+Type                                  Specified    Calculated
+______________________________________________________________
+
+Displacement                (tonnes)      25.58         25.20*
+Vertical center of buoyancy,     KB                     0.351*
+Vertical center of gravity,      VCG      1.000*
+Longitudinal center of buoyancy, LCB                   17.500*
+Longitudinal center of gravity,  LCG     17.500        17.500*
+Longitudinal metacentric height, GMl                  144.915*
+Transverse metacentric height,   GMt                   25.097*
+Roll radius of gyration,         r44      1.000*
+Pitch radius of gyration,        r55      1.000*
+Yaw radius of gyration,          r66      1.000*
+Roll-yaw radius of gyration,     r46      0.000*
+______________________________________________________________
+
+* - Applied in the hydrodynamic calculations
+

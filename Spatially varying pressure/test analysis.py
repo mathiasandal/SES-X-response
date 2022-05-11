@@ -73,11 +73,11 @@ A_test = A_n[0, 0, :, :, :]
 B_test = B_n[0, 0, :, :, :]
 C_test = C_n[0, 0, :, :, :]
 '''
-
-M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input('C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]')
+filepath = '/Spatially varying pressure/Input Files/Conceptual SES of 35m/0.1-50[Hz]'
+M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input(filepath)
 
 # Read input.re8 file to get excitation
-f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input('C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]')
+f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input(filepath)
 
 #REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
 

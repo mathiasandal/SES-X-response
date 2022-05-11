@@ -3,7 +3,7 @@ import numpy as np
 U = 50.  # [knots] Vessel velocity
 U = U * 0.514444  # [m/s] Vessel velocity
 g = 9.81  # [m/s^2] acceleration of gravity
-number_of_runs = 1
+number_of_runs = 10
 
 
 def f_e_to_T_0(f_e, U, g=9.81):
@@ -11,7 +11,7 @@ def f_e_to_T_0(f_e, U, g=9.81):
 
 
 f_e_min = 0.1  # [Hz] minimum encounter frequency in range
-f_e_max = 16.  # [Hz] maximum encounter frequency in range
+f_e_max = 50.  # [Hz] maximum encounter frequency in range
 f_e = np.linspace(f_e_min, f_e_max, 100*number_of_runs)
 
 T_0_1 = np.sort(f_e_to_T_0(f_e, U))
