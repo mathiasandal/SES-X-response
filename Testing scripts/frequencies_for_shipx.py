@@ -3,7 +3,7 @@ import numpy as np
 U = 50.  # [knots] Vessel velocity
 U = U * 0.514444  # [m/s] Vessel velocity
 g = 9.81  # [m/s^2] acceleration of gravity
-number_of_runs = 5
+number_of_runs = 1
 
 
 def f_e_to_T_0(f_e, U, g=9.81):
