@@ -176,13 +176,13 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[0, 0, :] = -(m + A_33)*np.power(omega_e, 2) + B_33 * 1j * omega_e + C_33
     A_mat[0, 1, :] = -A_35*np.power(omega_e, 2) + B_35 * 1j * omega_e + C_35
     A_mat[0, 2, :] = -A_c * p_0
-    f_vec[0, :] = F_3a
+    f_vec[0, :] = np.multiply(F_3a, zeta_a)
 
     # Pitch equation, i.e. eq. (88) Steen and Faltinsen (1995)
     A_mat[1, 0, :] = -A_53*np.power(omega_e, 2) + B_53 * 1j * omega_e + C_53
     A_mat[1, 1, :] = -(I_55+A_55)*np.power(omega_e, 2) + B_55 * 1j * omega_e + C_55
     A_mat[1, 2, :] = A_c * p_0 * x_cp
-    f_vec[1, :] = F_5a
+    f_vec[1, :] = np.multiply(F_5a, zeta_a)
 
     # Equation of dynamic uniform pressure, i.e. eq. (82) Steen and Faltinsen (1995)
     A_mat[2, 0, :] = rho_a * b * (k_2_AP*n_R_AP + k_2_FP*n_R_FP) + rho_0 * A_c * 1j * omega_e
