@@ -485,7 +485,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
 
     #integrand2 = np.multiply(np.power(np.absolute(np.divide(eta_3_amps - x*eta_5_amps + 1j*np.multiply(zeta_a, np.exp(1j*k*x)), zeta_a)), 2), PM_spectrum(omega_0s, H_s, T_p))
 
-    return np.sqrt(integrate.simpson(integrand, omega_0s))
+    return np.sqrt(integrate.simpson(integrand, omega_0s))  # np.sqrt(integrate.trapezoid(integrand, omega_0s))  #
 
 
 def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_AP, A_c_AP=0):
