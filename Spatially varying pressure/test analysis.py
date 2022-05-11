@@ -73,7 +73,7 @@ A_test = A_n[0, 0, :, :, :]
 B_test = B_n[0, 0, :, :, :]
 C_test = C_n[0, 0, :, :, :]
 '''
-filepath = '/Spatially varying pressure/Input Files/Conceptual SES of 35m/0.1-50[Hz]'
+filepath = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 35m/0.1-50[Hz]'
 M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input(filepath)
 
 # Read input.re8 file to get excitation
