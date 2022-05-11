@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from veres import read_re8_file, read_re7_file, read_group_of_re7_input, read_group_of_re8_input
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
@@ -22,7 +23,8 @@ rho_0 = 1.2796  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
 # source: https://www.gribble.org/cycling/air_density.html at 15deg C, p_0 + p_a
 
 rho_a = 1.225  # [kg/m^3] Density of air at atmospheric pressure
-rho_w = 1000.  # [kg/m^3] Density of fresh water
+rho_w = 1025.  # [kg/m^3] Density of salt water
+
 
 # SES main dimensions
 L_oa = 35.  # [m] Length overall
@@ -357,6 +359,26 @@ plt.plot(f_encounter, np.abs(mu_ua), 'x-',  label='$\\mu_{ua}$')
 plt.xlabel('Encounter frequency [Hz]')
 plt.legend()
 plt.show()
+
+# Compare with Steen and Faltinsen (1995)
+df = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Uniform pressure/uniform_pressure_RAO_nice_format.csv')
+
+
+plt.plot(df.iloc[:, 1], df.iloc[:, 2], label='Steen and Faltinsen (1995)')
+'''
+# Divide by wave amplitude, but makes sure zeta_a is not zero
+mu_ua_nondim = np.zeros([n_freq])
+for i in range(n_freq):
+    if zeta_a[i] > 1e-5:
+        mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]
+'''
+plt.plot(f_encounter, np.abs(mu_ua), label='This program')
+plt.title('Comparison with Steen and Faltinsen (1995)')
+plt.xlabel('Encounter frequency [Hz]')
+plt.ylabel('$\\mu_{ua}$ [-] / $\\zeta_a$ [m]')
+plt.legend()
+plt.show()
+
 
 # Plotting wave spectrum
 plotWaveSpectrum = True
