@@ -392,6 +392,8 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
                   [C_53, C_55, -x_cp * A_c * p_0],
                   [rho_a*b*(k_2_AP*n_B_AP + k_2_FP*n_B_FP), rho_a*b*L/2*(k_2_AP*n_B_AP - k_2_FP*n_B_FP), k_3]])
 
+    rank_mat = np.linalg.matrix_rank(a)
+
     f = np.array([0, 0, rho_a*b*(k_2_AP*n_B_AP*h_s_AP + k_2_FP*n_B_FP*h_s_FP)])
 
     # Solve linear system of equations
@@ -432,7 +434,7 @@ def N_B(b_L, sigma_L):
     return norm.cdf(b_L/sigma_L) + sigma_L/b_L * norm.pdf(b_L/sigma_L)
 
 
-def PM_spectrum(omega_0, H_s, T_p):  # TODO: Change to a modified wave spectrum
+def PM_spectrum(omega_0, H_s, T_p):
     """
     Computes the modified Pierson-Moskowitz spectrum at a given wave frequency and input parameters.
     Source: https://www.orcina.com/webhelp/OrcaFlex/Content/html/Waves,Wavespectra.htm#:~:text=The%20ISSC%20spectrum%20(

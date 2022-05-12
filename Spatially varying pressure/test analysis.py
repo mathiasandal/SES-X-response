@@ -59,10 +59,9 @@ A_c = L*b  # [m^2] Air cushion area  # TODO: Might want to use expression for re
 # ***** Read hydrodynamic coefficients for conceptual SES *****
 
 # Fetch hydrodynamic coefficients and loads
-path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
-path_re7 = path + 'input.re7'
-path_re8 = path + 'input.re8'
-
+#path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
+#path_re7 = path + 'input.re7'
+#path_re8 = path + 'input.re8'
 
 # Read input.re7 file to get hydrodynamic coefficients
 '''
@@ -73,7 +72,11 @@ A_test = A_n[0, 0, :, :, :]
 B_test = B_n[0, 0, :, :, :]
 C_test = C_n[0, 0, :, :, :]
 '''
-filepath = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 35m/0.1-50[Hz]'
+
+# High-speed formulation
+filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
+# Strip-theory formulation
+#filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
 M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input(filepath)
 
 # Read input.re8 file to get excitation
@@ -88,18 +91,22 @@ B_33 = B_temp[:, 2, 2]
 C_33 = C_temp[n_freq//2, 2, 2]
 
 A_35 = A_temp[:, 2, 4]
-B_35 = C_temp[:, 2, 4]
-C_35 = C_temp[n_freq//2, 2, 4]
+B_35 = B_temp[:, 2, 4]  #C_temp[:, 2, 4]
+#B_35[B_35 < 0.] = 0.
+
+C_35_53_test = C_temp[n_freq//2, 4, 2]  #B_temp[n_freq//2, 2, 4]  #70000.  #
+C_35 = C_35_53_test  #77000. #C_35_53_test  # B_temp[n_freq//2, 4, 2]  #
 
 A_53 = A_temp[:, 4, 2]
 B_53 = B_temp[:, 4, 2]
-C_53 = B_temp[n_freq//2, 4, 2]
+C_53 = C_35_53_test #B_temp[n_freq//2, 4, 2]  #C_temp[n_freq//2, 4, 2]  #76999.
 
 r_55 = 0.25 * L  # [m] radii of gyration in pitch
 I_55 = m * r_55**2
 A_55 = A_temp[:, 4, 4]
 B_55 = B_temp[:, 4, 4]
 C_55 = C_temp[n_freq//2, 4, 4]
+
 
 # Excitation
 # initialize array to contain complex force amplitudes
@@ -125,8 +132,66 @@ n_freq = len(omega_e)
 zeta_a = Zeta_a(omega_0, H_s, T_p)  # [m] wave amplitude dependent on encounter frequency
 #zeta_a = np.ones([len(omega_0)])
 
+water_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_0), 2)
+encounter_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_e), 2)
+
+
 # ***** Compute wave pumping *****
 F_wp = rho_0 * A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)
+
+# Plot for testing:
+'''
+plt.plot(f_encounter, np.abs(F_3a))
+plt.xlabel('Encounter frequency [Hz]')
+plt.show()
+'''
+
+plot_Coefficients = True
+
+if plot_Coefficients:
+
+    '''
+    plt.plot(f_encounter, np.abs(F_3a), label='F_3a')
+    plt.plot(f_encounter, A_35, label='A_35')
+    plt.plot(f_encounter, B_35, label='B_35')
+    plt.legend()
+    plt.xlabel('Encounter frequency [Hz]')
+    plt.show()
+    
+    
+    plt.plot(encounter_wavelength, np.abs(F_3a), label='F_3a')
+    plt.plot(encounter_wavelength, A_53, label='A_53')
+    plt.plot(encounter_wavelength, B_53, label='B_53')
+    plt.legend()
+    plt.xlabel('Encounter wavelength [m]')
+    plt.show()
+    '''
+
+    plt.plot(f_encounter, np.abs(F_3a), label='F_3a')
+    plt.plot(f_encounter, A_35, label='A_35')
+    plt.plot(f_encounter, B_35, label='B_35')
+    plt.plot(f_encounter, A_53, label='A_35')
+    plt.plot(f_encounter, B_53, label='B_35')
+    plt.legend()
+    plt.xlabel('Encounter frequency [Hz]')
+    plt.show()
+
+    plt.plot(f_encounter, np.abs(F_3a), label='F_3a')
+    plt.plot(f_encounter, A_33, label='A_33')
+    plt.plot(f_encounter, B_33, label='B_33')
+    plt.plot(f_encounter, B_55, label='B_55')
+    plt.legend()
+    plt.xlabel('Encounter frequency [Hz]')
+    plt.show()
+
+    '''
+    plt.plot(encounter_wavelength, np.abs(F_3a), label='F_3a')
+    plt.plot(encounter_wavelength, A_33, label='A_33')
+    plt.plot(encounter_wavelength, B_33, label='B_33')
+    plt.legend()
+    plt.xlabel('Encounter wavelength [m]')
+    plt.show()
+    '''
 
 # ***** Compute constants *****
 k_1 = K_1(rho_0, p_0, h_0, A_c)  # [kg] eq. (83) in Steen and Faltinsen (1995)
@@ -152,17 +217,21 @@ eta_5a_old = np.zeros([1, n_freq], dtype=complex)
 mu_ua_old = np.zeros([1, n_freq], dtype=complex)
 
 epsi = 1e-6  # [-] allowed error in stopping criteria for iteration process
-err = -1  # [-] initialize error variable to start while-loop
+rel_err = -1  # [-] initialize error variable to start while-loop
+abs_err = -1
 counter = 0  # initialize counter in while-loop
 max_iter = 100  # maximum number of iterations
 
 eta_3_test = []
 
-while ((err > epsi) or (counter < 2)) and (counter < max_iter):
+while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
     # Solve mean value relation
     eta_3m, eta_5m = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53)
-    # Compute mean leakage area et AP and FP
+    print('eta_3m = ', eta_3m)
+    print('eta_5m = ', eta_5m)
+
+    # Compute mean leakage area at AP and FP
     a_0_AP = A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP)
     a_0_FP = A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP)
 
@@ -211,7 +280,7 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
         b_7j = B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
 
         '''
-        # Deep copy for debugging
+        # Deep copy for debugging  #TODO: Remove this
         temp_mat = A_mat.copy()
         temp_vec = f_vec.copy()
 
@@ -313,7 +382,7 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
             # Wave excitation term
             f_vec[2, :] -= (-rho_0*p_0*dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(np.multiply(omega_e, b_7j) * r_j(lcg_fan + x_cp, j, L), zeta_a)
 
-        '''
+        ''' # TODO: Remove this
         test_mat = temp_mat - A_mat
         test_vec = temp_vec - f_vec
 
@@ -327,19 +396,42 @@ while ((err > epsi) or (counter < 2)) and (counter < max_iter):
         # Solves linear system of equations for each frequency
         eta_3a, eta_5a, mu_ua = solve_linear_systems_of_eq(A_mat, f_vec)
 
-        eta_3_test.append(eta_3a[4])  # Append value to test vector
+        eta_3_test.append(eta_3a[300])  # Append value to test vector
         if not counter == 0:  # compute error between current and previous if it is not the first iteration
-            err = np.amax([np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old)),
+            rel_err = np.amax([np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old)),
                            np.abs(np.divide(eta_5a - eta_5a_old, eta_5a_old)),
                            np.abs(np.divide(mu_ua - mu_ua_old, mu_ua_old))])
 
+            abs_err = np.amax([np.abs(eta_3a - eta_3a_old), np.abs(eta_5a - eta_5a_old), np.abs(mu_ua - mu_ua_old)])
+
+
+            err_eta_3a = np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old))
+            i_max_err_eta_3a = np.argmax(err_eta_3a)
+            err_eta_5a = np.abs(np.divide(eta_5a - eta_5a_old, eta_5a_old))
+            i_max_err_eta_5a = np.argmax(err_eta_5a)
+            err_mu_ua = np.abs(np.divide(mu_ua - mu_ua_old, mu_ua_old))
+            i_max_err_mu_ua = np.argmax(err_mu_ua)
+
+            print('The error largest error in heave occurs at index: ' + str(i_max_err_eta_3a))
+            print('The value of eta_3a at the current step is:\t' + str(np.abs(eta_3a[i_max_err_eta_3a])))
+            print('The value of eta_3a at previous step is:\t' + str(np.abs(eta_3a_old[i_max_err_eta_3a])))
+            print('Giving a relative error of:\t\t\t\t\t' + str(err_eta_3a[i_max_err_eta_3a]))
+            print('\nThe error largest error in pitch occurs at index: ' + str(i_max_err_eta_5a))
+            print('The value of eta_5a at the current step is:\t' + str(np.abs(eta_5a[i_max_err_eta_5a])))
+            print('The value of eta_5a at previous step is:\t' + str(np.abs(eta_5a_old[i_max_err_eta_5a])))
+            print('Giving a relative error of:\t\t\t\t\t' + str(err_eta_5a[i_max_err_eta_5a]))
+            print('\nThe error largest error in uniform pressure occurs at index: ' + str(i_max_err_mu_ua))
+            print('The value of mu_ua at the current step is:\t' + str(np.abs(mu_ua[i_max_err_mu_ua])))
+            print('The value of mu_ua at previous step is:\t\t' + str(np.abs(mu_ua_old[i_max_err_mu_ua])))
+            print('Giving a relative error of:\t\t\t\t\t' + str(err_mu_ua[i_max_err_mu_ua]))
+            print()
         # Stores current solution for comparison in next iteration
         eta_3a_old = eta_3a
         eta_5a_old = eta_5a
         mu_ua_old = mu_ua
 
         counter += 1  # increment counter
-        print("Current iteration:", counter, 'with error:', err)
+        print("Current iteration:", counter, 'with relative error:', rel_err)
         # Compute new value for bias and gain for the linearized leakage for the next iteration
 
         b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
@@ -357,31 +449,54 @@ plt.plot(f_encounter, np.abs(eta_3a), 'x-', label='$\\eta_3$')
 plt.plot(f_encounter, np.abs(eta_5a), 'x-',  label='$\\eta_5$')
 plt.plot(f_encounter, np.abs(mu_ua), 'x-',  label='$\\mu_{ua}$')
 plt.xlabel('Encounter frequency [Hz]')
+plt.xlim([0, 16])
 plt.legend()
 plt.show()
 
+# Store results
+df_result = pd.DataFrame({'f_enc [Hz]': f_encounter, 'zeta_a [m]': zeta_a, 'eta_3a [m]': np.abs(eta_3a), 'eta_5a [rad]': np.abs(eta_5a), 'mu_ua [-]': np.abs(mu_ua)})
+
+df_result.to_csv('Results/results_strip_theory.csv')
+
 # Compare with Steen and Faltinsen (1995)
-df = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Uniform pressure/uniform_pressure_RAO_nice_format.csv')
+df_uniform = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Uniform pressure/uniform_pressure_RAO_nice_format.csv')
 
-
-plt.plot(df.iloc[:, 1], df.iloc[:, 2], label='Steen and Faltinsen (1995)')
-'''
+''''''
 # Divide by wave amplitude, but makes sure zeta_a is not zero
 mu_ua_nondim = np.zeros([n_freq])
 for i in range(n_freq):
-    if zeta_a[i] > 1e-5:
+    if zeta_a[i] > 1e-30:
         mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]
-'''
-plt.plot(f_encounter, np.abs(mu_ua), label='This program')
+
+#plt.plot(f_encounter, np.abs(mu_ua), label='This program')
+plt.plot(f_encounter, mu_ua_nondim, label='This program')
+plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label='Steen and Faltinsen (1995)')
 plt.title('Comparison with Steen and Faltinsen (1995)')
 plt.xlabel('Encounter frequency [Hz]')
 plt.ylabel('$\\mu_{ua}$ [-] / $\\zeta_a$ [m]')
+plt.xlim([0, 16])
+plt.legend()
+plt.show()
+
+df_vert_acc = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Vert. Acc. AP/vertical_acc_AP_RAO_nice_format.csv')
+
+vert_acc_AP_nondim = np.zeros([n_freq])
+for i in range(n_freq):
+    if zeta_a[i] > 1e-30:
+        vert_acc_AP_nondim[i] = np.abs(np.abs(-omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i]))) / zeta_a[i]
+
+plt.plot(f_encounter, vert_acc_AP_nondim, label='This program')
+plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label='Steen and Faltinsen (1995)')
+plt.xlim([0, 16.])
+plt.title('Comparison with Steen and Faltinsen (1995)')
+plt.xlabel('Encounter frequency [Hz]')
+plt.ylabel('Vert. Acc. $[m/s^2]$ / $\\zeta_a [m]$')
 plt.legend()
 plt.show()
 
 
 # Plotting wave spectrum
-plotWaveSpectrum = True
+plotWaveSpectrum = False
 if plotWaveSpectrum:
 
     f_e_PM = np.linspace(0.1, 50, 1000)
@@ -394,6 +509,12 @@ if plotWaveSpectrum:
     plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
     plt.show()
 
-    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
+    #plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
 
-print("The iteration scheme converged after", counter, "iterations and the relative error was then", err)
+print('The iteration scheme converged after', counter)
+print('Relative error:\t\t', rel_err)
+print('Absolute error:\t\t', abs_err)
+
+plt.plot(np.abs(eta_3_test))
+plt.show()
+
