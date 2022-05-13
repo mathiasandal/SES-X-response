@@ -19,11 +19,13 @@ T_p = 1.5  # [s] wave peak period
 c = 343.  # [m/s] Speed of sound in air
 g = 9.81  # [m/s^2] Acceleration of gravity
 p_a = 101325.  # [Pa] Atmospheric pressure
-rho_0 = 1.2796  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
+#rho_0 = 1.2796  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
 # source: https://www.gribble.org/cycling/air_density.html at 15deg C, p_0 + p_a
 
 rho_a = 1.225  # [kg/m^3] Density of air at atmospheric pressure
 rho_w = 1025.  # [kg/m^3] Density of salt water
+
+gamma = 1.4
 
 
 # SES main dimensions
@@ -45,6 +47,9 @@ dQdp_0 = dQdp_0 / rho_w / g  # [(m^3/s)/Pa] Linear fan slope
 
 lcg_fan = 5.6  # [m] Longitudinal fan position (from CG)
 x_F = 0  # [m]
+
+# Calculate initial density of air in air cushion
+rho_0 = rho_a*((p_0 + p_a)/p_a)**(1/gamma)  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
 
 # Other parameters
 h_s_AP = 0.1  # [m] aft seal submergence
@@ -86,25 +91,25 @@ f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input(
 
 n_freq = len(FREQ_re8)
 
-A_33 = A_temp[:, 2, 2]
-B_33 = B_temp[:, 2, 2]
-C_33 = C_temp[n_freq//2, 2, 2]
+A_33 = A_temp[:, 2, 2]*0.
+B_33 = B_temp[:, 2, 2]*0.
+C_33 = C_temp[n_freq//2, 2, 2]*2
 
-A_35 = A_temp[:, 2, 4]
-B_35 = B_temp[:, 2, 4]  #C_temp[:, 2, 4]
+A_35 = A_temp[:, 2, 4]*0.
+B_35 = B_temp[:, 2, 4]*0. #C_temp[:, 2, 4]
 #B_35[B_35 < 0.] = 0.
 
 C_35_53_test = C_temp[n_freq//2, 4, 2]  #B_temp[n_freq//2, 2, 4]  #70000.  #
 C_35 = C_35_53_test  #77000. #C_35_53_test  # B_temp[n_freq//2, 4, 2]  #
 
-A_53 = A_temp[:, 4, 2]
-B_53 = B_temp[:, 4, 2]
-C_53 = C_35_53_test #B_temp[n_freq//2, 4, 2]  #C_temp[n_freq//2, 4, 2]  #76999.
+A_53 = A_temp[:, 4, 2]*0.
+B_53 = B_temp[:, 4, 2]*0.
+C_53 = C_35_53_test*0 #B_temp[n_freq//2, 4, 2]  #C_temp[n_freq//2, 4, 2]  #76999.
 
 r_55 = 0.25 * L  # [m] radii of gyration in pitch
 I_55 = m * r_55**2
-A_55 = A_temp[:, 4, 4]
-B_55 = B_temp[:, 4, 4]
+A_55 = A_temp[:, 4, 4]*0.
+B_55 = B_temp[:, 4, 4]*75.
 C_55 = C_temp[n_freq//2, 4, 4]
 
 
@@ -119,8 +124,8 @@ for i in range(6):
         f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
 '''
 
-F_3a = f_ex[2, :]
-F_5a = f_ex[4, :]
+F_3a = f_ex[2, :]*0.
+F_5a = f_ex[4, :]*0.
 
 #omega_0 = np.linspace(1, 10, 1000)
 omega_0 = FREQ_re7
@@ -146,7 +151,7 @@ plt.xlabel('Encounter frequency [Hz]')
 plt.show()
 '''
 
-plot_Coefficients = True
+plot_Coefficients = False
 
 if plot_Coefficients:
 
@@ -196,8 +201,8 @@ if plot_Coefficients:
 # ***** Compute constants *****
 k_1 = K_1(rho_0, p_0, h_0, A_c)  # [kg] eq. (83) in Steen and Faltinsen (1995)
 
-k_2_AP = K_2(p_0, 1.0)  # [m/s] linearized equivalent outflow velocity constant at stern
-k_2_FP = K_2(p_0, 0.61)  # [m/s] linearized equivalent outflow velocity constant at bow
+k_2_AP = K_2(p_0, 1.0)  # [m/s] linearized equivalent outflow velocity constant at stern 1.0
+k_2_FP = K_2(p_0, 0.61)  # [m/s] linearized equivalent outflow velocity constant at bow 0.61
 
 k_3 = K_3(rho_0, p_0, Q_0, dQdp_0)  # air cushion flow airflow constant
 
@@ -245,13 +250,13 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[0, 0, :] = -(m + A_33)*np.power(omega_e, 2) + B_33 * 1j * omega_e + C_33
     A_mat[0, 1, :] = -A_35*np.power(omega_e, 2) + B_35 * 1j * omega_e + C_35
     A_mat[0, 2, :] = -A_c * p_0
-    f_vec[0, :] = F_3a  # np.multiply(F_3a, zeta_a)  #
+    f_vec[0, :] = F_3a * 0  #np.multiply(F_3a, zeta_a)  #
 
     # Pitch equation, i.e. eq. (88) Steen and Faltinsen (1995)
     A_mat[1, 0, :] = -np.multiply(A_53, np.power(omega_e, 2)) + 1j * np.multiply(B_53, omega_e) + C_53
     A_mat[1, 1, :] = -np.multiply((I_55+A_55), np.power(omega_e, 2)) + 1j * np.multiply(B_55, omega_e) + C_55
     A_mat[1, 2, :] = A_c * p_0 * x_cp
-    f_vec[1, :] = F_5a  # np.multiply(F_5a, zeta_a)  #
+    f_vec[1, :] = F_5a * 0  #np.multiply(F_5a, zeta_a)  #
 
     # Equation of dynamic uniform pressure, i.e. eq. (82) Steen and Faltinsen (1995)
     A_mat[2, 0, :] = rho_a * b * (k_2_AP*n_R_AP + k_2_FP*n_R_FP) + rho_0 * A_c * 1j * omega_e
@@ -398,9 +403,18 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
         eta_3_test.append(eta_3a[300])  # Append value to test vector
         if not counter == 0:  # compute error between current and previous if it is not the first iteration
-            rel_err = np.amax([np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old)),
+
+            rel_errors = np.hstack([np.abs(np.divide(eta_3a - eta_3a_old, eta_3a_old)),
                            np.abs(np.divide(eta_5a - eta_5a_old, eta_5a_old)),
                            np.abs(np.divide(mu_ua - mu_ua_old, mu_ua_old))])
+
+            rel_errors[np.isnan(rel_errors)] = 0.
+
+            rel_err = np.amax(rel_errors)
+
+            #gh = np.isnan(rel_err)
+
+            #rel_err[np.isnan(rel_err)] = 0.
 
             abs_err = np.amax([np.abs(eta_3a - eta_3a_old), np.abs(eta_5a - eta_5a_old), np.abs(mu_ua - mu_ua_old)])
 
@@ -466,8 +480,8 @@ df_uniform = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially
 # Divide by wave amplitude, but makes sure zeta_a is not zero
 mu_ua_nondim = np.zeros([n_freq])
 for i in range(n_freq):
-    if zeta_a[i] > 1e-30:
-        mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]
+    if zeta_a[i] > 1e-40:
+        mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i] # 1 #
 
 #plt.plot(f_encounter, np.abs(mu_ua), label='This program')
 plt.plot(f_encounter, mu_ua_nondim, label='This program')
@@ -476,6 +490,7 @@ plt.title('Comparison with Steen and Faltinsen (1995)')
 plt.xlabel('Encounter frequency [Hz]')
 plt.ylabel('$\\mu_{ua}$ [-] / $\\zeta_a$ [m]')
 plt.xlim([0, 16])
+#plt.ylim([0, np.max(mu_ua_nondim[f_encounter > 0])])
 plt.legend()
 plt.show()
 
@@ -483,12 +498,13 @@ df_vert_acc = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatiall
 
 vert_acc_AP_nondim = np.zeros([n_freq])
 for i in range(n_freq):
-    if zeta_a[i] > 1e-30:
-        vert_acc_AP_nondim[i] = np.abs(np.abs(-omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i]))) / zeta_a[i]
+    if zeta_a[i] > 1e-40:
+        vert_acc_AP_nondim[i] = np.abs(np.abs(-omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i]))) / zeta_a[i] # / 1  #
 
 plt.plot(f_encounter, vert_acc_AP_nondim, label='This program')
 plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label='Steen and Faltinsen (1995)')
 plt.xlim([0, 16.])
+#plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > 0])])
 plt.title('Comparison with Steen and Faltinsen (1995)')
 plt.xlabel('Encounter frequency [Hz]')
 plt.ylabel('Vert. Acc. $[m/s^2]$ / $\\zeta_a [m]$')
@@ -497,7 +513,7 @@ plt.show()
 
 
 # Plotting wave spectrum
-plotWaveSpectrum = True
+plotWaveSpectrum = False
 if plotWaveSpectrum:
 
     f_e_PM = np.linspace(0.1, 50, 1000)
