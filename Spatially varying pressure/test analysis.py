@@ -74,7 +74,7 @@ C_test = C_n[0, 0, :, :, :]
 '''
 
 # High-speed formulation
-filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
+filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_high_speed/DWL'
 # Strip-theory formulation
 #filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
 M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input(filepath)
@@ -245,13 +245,13 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[0, 0, :] = -(m + A_33)*np.power(omega_e, 2) + B_33 * 1j * omega_e + C_33
     A_mat[0, 1, :] = -A_35*np.power(omega_e, 2) + B_35 * 1j * omega_e + C_35
     A_mat[0, 2, :] = -A_c * p_0
-    f_vec[0, :] = np.multiply(F_3a, zeta_a)  # F_3a
+    f_vec[0, :] = F_3a  # np.multiply(F_3a, zeta_a)  #
 
     # Pitch equation, i.e. eq. (88) Steen and Faltinsen (1995)
     A_mat[1, 0, :] = -np.multiply(A_53, np.power(omega_e, 2)) + 1j * np.multiply(B_53, omega_e) + C_53
     A_mat[1, 1, :] = -np.multiply((I_55+A_55), np.power(omega_e, 2)) + 1j * np.multiply(B_55, omega_e) + C_55
     A_mat[1, 2, :] = A_c * p_0 * x_cp
-    f_vec[1, :] = np.multiply(F_5a, zeta_a)  # F_5a
+    f_vec[1, :] = F_5a  # np.multiply(F_5a, zeta_a)  #
 
     # Equation of dynamic uniform pressure, i.e. eq. (82) Steen and Faltinsen (1995)
     A_mat[2, 0, :] = rho_a * b * (k_2_AP*n_R_AP + k_2_FP*n_R_FP) + rho_0 * A_c * 1j * omega_e
@@ -454,9 +454,10 @@ plt.legend()
 plt.show()
 
 # Store results
-df_result = pd.DataFrame({'f_enc [Hz]': f_encounter, 'zeta_a [m]': zeta_a, 'eta_3a [m]': np.abs(eta_3a), 'eta_5a [rad]': np.abs(eta_5a), 'mu_ua [-]': np.abs(mu_ua)})
-
-df_result.to_csv('Results/results_strip_theory.csv')
+store_results = False
+if store_results:
+    df_result = pd.DataFrame({'f_enc [Hz]': f_encounter, 'zeta_a [m]': zeta_a, 'eta_3a [m]': np.abs(eta_3a), 'eta_5a [rad]': np.abs(eta_5a), 'mu_ua [-]': np.abs(mu_ua)})
+    df_result.to_csv('Results/results_strip_theory.csv')
 
 # Compare with Steen and Faltinsen (1995)
 df_uniform = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Uniform pressure/uniform_pressure_RAO_nice_format.csv')
@@ -496,7 +497,7 @@ plt.show()
 
 
 # Plotting wave spectrum
-plotWaveSpectrum = False
+plotWaveSpectrum = True
 if plotWaveSpectrum:
 
     f_e_PM = np.linspace(0.1, 50, 1000)
