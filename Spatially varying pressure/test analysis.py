@@ -436,8 +436,8 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
         b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
         b_L_FP = eta_3m - L/2*eta_5m - h_s_FP
-        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
-        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
+        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
+        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
 
         n_R_AP = N_R(b_L_AP, sigma_L_AP)
         n_R_FP = N_R(b_L_FP, sigma_L_FP)
