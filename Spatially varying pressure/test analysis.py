@@ -5,6 +5,7 @@ from veres import read_re8_file, read_re7_file, read_group_of_re7_input, read_gr
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
     A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
     append_spatially_varying_terms, PM_spectrum
+from HyCoef import compute_hydrodynamic_coeff
 """Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
 """
@@ -31,6 +32,7 @@ gamma = 1.4
 # SES main dimensions
 L_oa = 35.  # [m] Length overall
 L = 28.  # [m] Air cushion length
+b_s = 0.5  # [m] Beam of side hulls
 b = 8.  # [m] Air cushion beam
 m = 140.  # [tons] Vessel total mass
 m = m * 1e3  # [kg] Vessel total mass
@@ -91,25 +93,25 @@ f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input(
 
 n_freq = len(FREQ_re8)
 
-A_33 = A_temp[:, 2, 2]*0.
-B_33 = B_temp[:, 2, 2]*0.
+#A_33 = A_temp[:, 2, 2]*0.
+#B_33 = B_temp[:, 2, 2]*0.
 C_33 = C_temp[n_freq//2, 2, 2]*2
 
-A_35 = A_temp[:, 2, 4]*0.
-B_35 = B_temp[:, 2, 4]*0. #C_temp[:, 2, 4]
+#A_35 = A_temp[:, 2, 4]*0.
+#B_35 = B_temp[:, 2, 4]*0. #C_temp[:, 2, 4]
 #B_35[B_35 < 0.] = 0.
 
 C_35_53_test = C_temp[n_freq//2, 4, 2]  #B_temp[n_freq//2, 2, 4]  #70000.  #
 C_35 = C_35_53_test  #77000. #C_35_53_test  # B_temp[n_freq//2, 4, 2]  #
 
-A_53 = A_temp[:, 4, 2]*0.
-B_53 = B_temp[:, 4, 2]*0.
+#A_53 = A_temp[:, 4, 2]*0.
+#B_53 = B_temp[:, 4, 2]*0.
 C_53 = C_35_53_test*0 #B_temp[n_freq//2, 4, 2]  #C_temp[n_freq//2, 4, 2]  #76999.
 
 r_55 = 0.25 * L  # [m] radii of gyration in pitch
 I_55 = m * r_55**2
-A_55 = A_temp[:, 4, 4]*0.
-B_55 = B_temp[:, 4, 4]*75.
+#A_55 = A_temp[:, 4, 4]*0.
+#B_55 = B_temp[:, 4, 4]*75.
 C_55 = C_temp[n_freq//2, 4, 4]
 
 
@@ -140,6 +142,7 @@ zeta_a = Zeta_a(omega_0, H_s, T_p)  # [m] wave amplitude dependent on encounter 
 water_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_0), 2)
 encounter_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_e), 2)
 
+A_33, A_35, A_53, A_55, B_33, B_35, B_53, B_55 = compute_hydrodynamic_coeff(L, b_s, U, omega_0)
 
 # ***** Compute wave pumping *****
 F_wp = rho_0 * A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)
