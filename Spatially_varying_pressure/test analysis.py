@@ -66,7 +66,7 @@ A_c = L*b  # [m^2] Air cushion area  # TODO: Might want to use expression for re
 # ***** Read hydrodynamic coefficients for conceptual SES *****
 
 # Fetch hydrodynamic coefficients and loads
-#path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially varying pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
+#path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially_varying_pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
 #path_re7 = path + 'input.re7'
 #path_re8 = path + 'input.re8'
 
