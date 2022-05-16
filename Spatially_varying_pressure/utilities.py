@@ -453,7 +453,7 @@ def PM_spectrum(omega_0, H_s, T_p):
            np.multiply(np.power(omega_0, -5), np.exp(-5/4*(T_p/2/np.pi)**-4 * np.power(omega_0, -4)))
 
 
-def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1., g=9.81):
+def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
     """
     Computes integral in eq. (3.28) in Steen 'Cobblestone effect on SES' numerically using Simpsons rule.
     :param x: (double)
@@ -468,7 +468,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1., g=9.81
         [m] significant wave height
     :param T_p: (double)
         [s] peak wave period
-    :param zeta_a: (double))
+    :param zeta_a: (double)  # (1xn) vector
         [m] wave amplitude
     :param g: (double) default=9.81
         [m/s^2] Acceleration of gravity
@@ -477,16 +477,16 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a=1., g=9.81
     """
 
     k = np.divide(np.power(omega_0s, 2), g)  # computes wave number of water waves
-    # wave_spectrum = PM_spectrum(omega_0s, H_s, T_p)
-    '''
+    wave_spectrum = PM_spectrum(omega_0s, H_s, T_p)
+
     integrand = np.zeros([len(k)])
 
     for i in range(len(k)):
         if zeta_a[i] > 0.0:
             integrand[i] = np.power((np.abs(eta_3_amps[i] - x*eta_5_amps[i] + 1j*zeta_a[i]*np.exp(1j*k[i]*x))/zeta_a[i]), 2)*wave_spectrum[i]
-    '''
+    ''''''
 
-    integrand = np.multiply(np.power((np.absolute(eta_3_amps - x*eta_5_amps + 1j * zeta_a * np.exp(1j*k*x)) / zeta_a), 2), PM_spectrum(omega_0s, H_s, T_p))
+    # integrand = np.multiply(np.power((np.absolute(eta_3_amps - x*eta_5_amps + 1j * zeta_a * np.exp(1j*k*x)) / zeta_a), 2), PM_spectrum(omega_0s, H_s, T_p))
 
     return np.sqrt(integrate.simpson(integrand, omega_0s))  # np.sqrt(integrate.trapezoid(integrand, omega_0s))  #
 

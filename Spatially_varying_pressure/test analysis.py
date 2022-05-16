@@ -17,7 +17,7 @@ H_s = 0.15  # [m] significant wave height
 T_p = 1.5  # [s] wave peak period
 
 # Physical constants
-c = 343.  # [m/s] Speed of sound in air
+c = 331.  # [m/s] Speed of sound in air
 g = 9.81  # [m/s^2] Acceleration of gravity
 p_a = 101325.  # [Pa] Atmospheric pressure
 #rho_0 = 1.2796  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
@@ -25,8 +25,8 @@ p_a = 101325.  # [Pa] Atmospheric pressure
 
 rho_a = 1.225  # [kg/m^3] Density of air at atmospheric pressure
 rho_w = 1025.  # [kg/m^3] Density of salt water
-
-gamma = 1.4
+rho = 1000.  # [kg/m^3] Density of fresh water
+gamma = 1.4  # [-] Ratio of specific heat of air at adiabatic condition
 
 
 # SES main dimensions
@@ -47,7 +47,7 @@ Q_0 = 150.  # [m^3/s] Mean fan flow rate
 dQdp_0 = -140.  # [m^2/s] Linear fan slope
 dQdp_0 = dQdp_0 / rho_w / g  # [(m^3/s)/Pa] Linear fan slope
 
-lcg_fan = 5.6  # [m] Longitudinal fan position (from CG)
+
 x_F = 0  # [m]
 
 # Calculate initial density of air in air cushion
@@ -59,7 +59,7 @@ h_s_FP = 0.1  # [m] bow seal submergence
 x_cp = 0  # [m] longitudinal centroid of air cushion relative to CoG(?)  #TODO: Make sure this is correct
 x_g_AP = -L/2 - x_cp  # [m] position of leakage at AP relative to center of gravity
 x_g_FP = L/2 - x_cp  # [m] position of leakage at FP relative to center of gravity
-
+lcg_fan = 5.6 - x_cp  # [m] Longitudinal fan position (from CG)
 # Derived parameters
 A_c = L*b  # [m^2] Air cushion area  # TODO: Might want to use expression for rectangular cushion shape with triangle at the front
 
@@ -99,7 +99,7 @@ C_35 = 33.  # Temporarily set to zero
 
 C_53 = 33.  # Temporarily set to zero
 
-r_55 = 0.25 * L  # [m] radii of gyration in pitch
+r_55 = 0.22 * L  # [m] radii of gyration in pitch (Between 0.2*L_PP and 0.3*L_PP)
 I_55 = m * r_55**2
 C_55 = C_temp[n_freq//2, 4, 4]
 
@@ -229,10 +229,10 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     print('eta_5m = ', eta_5m)
 
     # Compute mean leakage area at AP and FP
-    a_0_AP = A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP)
-    a_0_FP = A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP)
+    a_0_AP = A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP)  # , 0.5) #
+    a_0_FP = A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP)  # , 0.5) #
 
-    j_max = 15  # number of acoustic modes to include in the calculations
+    j_max = 20  # number of acoustic modes to include in the calculations
 
     A_mat = np.zeros([3, 3, n_freq], dtype=complex)  # initialize coefficient matrix for linear system of eq.
     f_vec = np.zeros([3, n_freq], dtype=complex)  # initialize column vector on the right hand side of the equation
@@ -260,18 +260,18 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     for j in range(1, j_max + 1):
 
         # Computes variables dependent on j
-        xi_j = Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, a_0_AP, a_0_FP, dQdp_0, lcg_fan)  # [-] Relative damping ratio of mode j  # TODO check if I should use lcg_fan instead of x_F
+        xi_j = Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, a_0_AP, a_0_FP, dQdp_0, lcg_fan + x_cp)  # [-] Relative damping ratio of mode j  # TODO check if I should use lcg_fan instead of x_F
         omega_j = Omega_j(j, L)
         k_4 = K_4(xi_j, h_0, omega_e, omega_j)
 
         # Frequency dependent modal amplitudes for odd acoustic modes
-        a_0j = A_0j(j, b, L, p_0, dQdp_0, lcg_fan, k_2_AP, k_2_FP, a_0_AP, a_0_FP, k_4)
+        a_0j = A_0j(j, b, L, p_0, dQdp_0, lcg_fan + x_cp, k_2_AP, k_2_FP, a_0_AP, a_0_FP, k_4)
         a_3j = A_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         a_5j = A_5j(j, L, omega_e, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         a_7j = A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
 
         # Frequency dependent modal amplitudes for even acoustic modes
-        b_0j = B_0j(j, b, L, p_0, dQdp_0, lcg_fan, k_2_AP, k_2_FP, a_0_AP, a_0_FP, k_4)
+        b_0j = B_0j(j, b, L, p_0, dQdp_0, lcg_fan + x_cp, k_2_AP, k_2_FP, a_0_AP, a_0_FP, k_4)
         b_3j = B_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         b_5j = B_5j(k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         b_7j = B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
@@ -442,8 +442,8 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
         b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
         b_L_FP = eta_3m - L/2*eta_5m - h_s_FP
-        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
-        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p)
+        sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
+        sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
 
         n_R_AP = N_R(b_L_AP, sigma_L_AP)
         n_R_FP = N_R(b_L_FP, sigma_L_FP)
@@ -493,7 +493,7 @@ df_vert_acc = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatiall
 vert_acc_AP_nondim = np.zeros([n_freq])
 for i in range(n_freq):
     if zeta_a[i] > 1e-20:
-        vert_acc_AP_nondim[i] = np.abs(np.abs(-omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i]))) / zeta_a[i]  # / 1  #
+        vert_acc_AP_nondim[i] = np.absolute(omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i])) / zeta_a[i]  # / 1  #
 
 plt.plot(f_encounter, vert_acc_AP_nondim, label='This program, Hs=' + str(H_s) + 'm, Tp=' + str(T_p) + 's')
 plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label='Steen and Faltinsen (1995), Hs=0.15m, Tp=1.5s')
