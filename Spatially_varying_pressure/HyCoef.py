@@ -49,6 +49,7 @@ def compute_hydrodynamic_coeff(L_c, Bs, U, omega_0, rho_w=1025., g=9.81):
     # TODO: Make sure if I need to multiply by 2 to include both side hulls
     return 2*A_33, 2*A_35, 2*A_53, 2*A_55, 2*B_33, 2*B_35, 2*B_53, 2*B_55
 
+
 def compute_hydrostatic_coeff(m, L_oa, L_c, b_s, kb, zb, zg, rho_w=1025., g=9.81):
     A_w = 2*L_oa*b_s
     C_33 = rho_w * g * A_w

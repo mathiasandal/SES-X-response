@@ -271,7 +271,7 @@ def K_3(rho_0, p_0, Q_0, dQdp_0):
     :return: (double)
         K_3 constant
     """
-    return rho_0 * Q_0 / 2 - rho_0 * p_0 * dQdp_0
+    return (rho_0 * Q_0 / 2 - rho_0 * p_0 * dQdp_0)
 
 
 def Xi_j(j, rho_0, p_0, h_0, b, L, k_2_AP, k_2_FP, A_0_AP, A_0_FP, dQdp_0, x_F, c=343):
