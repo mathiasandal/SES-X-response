@@ -95,13 +95,17 @@ n_freq = len(FREQ_re8)
 
 C_33 = C_temp[n_freq//2, 2, 2]
 
-C_35 = 33.  # Temporarily set to zero
+C_35 = 0  # 33.  # Temporarily set to zero
 
-C_53 = 33.  # Temporarily set to zero
+C_53 = 0  # 33.  # Temporarily set to zero
 
-r_55 = 0.22 * L  # [m] radii of gyration in pitch (Between 0.2*L_PP and 0.3*L_PP)
-I_55 = m * r_55**2
-C_55 = C_temp[n_freq//2, 4, 4]
+r_55 = 0.21 * L  # [m] radii of gyration in pitch (Between 0.2*L_PP and 0.3*L_PP)
+I_55 = 2860000.  # m * r_55**2  #6860000.  #
+kb = 0.8
+zb = 0.2
+zg = 1.0
+C_55 = m*g*((1-kb)*zb - zg) + rho_w*g*(L_oa**3*b_s/6.0)  # Using input from SIMPACC
+#C_55 = C_temp[n_freq//2, 4, 4]
 
 
 # Excitation
@@ -224,15 +228,19 @@ eta_3_test = []
 while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
     # Solve mean value relation
-    eta_3m, eta_5m = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53)
+    eta_3m, eta_5m, mu_um = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP, h_s_FP, C_33, C_55, C_35, C_53)
     print('eta_3m = ', eta_3m)
     print('eta_5m = ', eta_5m)
+    print('eta_7m = ', mu_um)
+
+    # Correct mean cushion pressure
+    p_0 = (1 + mu_um) * p_0
 
     # Compute mean leakage area at AP and FP
-    a_0_AP = A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP)  # , 0.5) #
-    a_0_FP = A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP)  # , 0.5) #
+    a_0_AP = np.maximum(A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP), 0)  # , 0.5) #
+    a_0_FP = np.maximum(A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP), 0)  # , 0.5) #
 
-    j_max = 20  # number of acoustic modes to include in the calculations
+    j_max = 2  # number of acoustic modes to include in the calculations
 
     A_mat = np.zeros([3, 3, n_freq], dtype=complex)  # initialize coefficient matrix for linear system of eq.
     f_vec = np.zeros([3, n_freq], dtype=complex)  # initialize column vector on the right hand side of the equation
@@ -442,6 +450,7 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
         b_L_AP = eta_3m + L/2*eta_5m - h_s_AP  # TODO: Might want to do this in seperate sub-routines
         b_L_FP = eta_3m - L/2*eta_5m - h_s_FP
+
         sigma_L_AP = rms_leakage(-L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
         sigma_L_FP = rms_leakage(L/2, omega_0, eta_3a, eta_5a, H_s, T_p, zeta_a)
 
