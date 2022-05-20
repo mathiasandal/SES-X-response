@@ -401,9 +401,9 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
 
     eta_3m = x[0]  # [m] Mean value of heave
     eta_5m = x[1]  # [rad] Mean value of pitch
-    #mu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
+    mu_um = x[2]  # [-] Mean value of dim. less dynamic uniform pressure
 
-    return eta_3m, eta_5m
+    return eta_3m, eta_5m, mu_um
 
 
 def N_R(b_L, sigma_L):
