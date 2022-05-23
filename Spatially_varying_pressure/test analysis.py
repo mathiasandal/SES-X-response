@@ -138,7 +138,7 @@ encounter_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_e), 2)
 A_33, A_35, A_53, A_55, B_33, B_35, B_53, B_55 = compute_hydrodynamic_coeff(L_oa, b_s, U, omega_0)
 
 # ***** Compute wave pumping *****
-F_wp = rho_0 * A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)  # 1) #
+F_wp =  A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)  # 1) #
 
 # Plot for testing:
 '''
@@ -262,7 +262,7 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     A_mat[2, 0, :] = rho_a * b * (k_2_AP*n_R_AP + k_2_FP*n_R_FP) + rho_0 * A_c * 1j * omega_e
     A_mat[2, 1, :] = rho_a * b * L/2 * (k_2_AP*n_R_AP - k_2_FP*n_R_FP) - rho_0 * A_c * x_cp * 1j * omega_e
     A_mat[2, 2, :] = k_1 * 1j * omega_e + k_3
-    f_vec[2, :] = F_wp - rho_a * b * 1j * (k_2_AP*n_R_AP * np.exp(-1j * k * L/2) + k_2_FP*n_R_FP * np.exp(1j * k * L/2))
+    f_vec[2, :] = rho_0 *F_wp - rho_a * b * 1j * (k_2_AP*n_R_AP * np.exp(-1j * k * L/2) + k_2_FP*n_R_FP * np.exp(1j * k * L/2))
 
     # ***** Fill in terms due to spatially varying pressure *****
     for j in range(1, j_max + 1):
