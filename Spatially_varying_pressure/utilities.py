@@ -389,7 +389,7 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
     """
     # Define system of equations
     a = np.array([[C_33, C_35, -A_c * p_0],
-                  [C_53, C_55, -x_cp * A_c * p_0],
+                  [C_53, C_55, x_cp * A_c * p_0],
                   [rho_a*b*(k_2_AP*n_B_AP + k_2_FP*n_B_FP), rho_a*b*L/2*(k_2_AP*n_B_AP - k_2_FP*n_B_FP), k_3]])
 
     rank_mat = np.linalg.matrix_rank(a)
