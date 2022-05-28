@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.rcParams['text.usetex'] = True
 from veres import read_re8_file, read_re7_file, read_group_of_re7_input, read_group_of_re8_input
 from utilities import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
     A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
@@ -478,23 +479,34 @@ if store_results:
 # Compare with Steen and Faltinsen (1995)
 df_uniform = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Uniform pressure/uniform_pressure_RAO_nice_format.csv')
 
-''''''
+
+# Define plot colors
+color_BBGreen = '#5cb16d'
+color_BBPurple = '#b15ca0'
+
 # Divide by wave amplitude, but makes sure zeta_a is not zero
 mu_ua_nondim = np.zeros([n_freq])
 for i in range(n_freq):
     if zeta_a[i] > 1e-20:
         mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]  # 1 #
 
+save_RAOs_for_comparison = True
 #plt.plot(f_encounter, np.abs(mu_ua), label='This program')
-plt.plot(f_encounter, mu_ua_nondim, label='This program, Hs=' + str(H_s) + 'm, Tp=' + str(T_p) + 's')
-plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label='Steen and Faltinsen (1995), Hs=0.15m, Tp=1.5s')
-plt.title('Comparison with Steen and Faltinsen (1995)')
-plt.xlabel('Encounter frequency [Hz]')
-plt.ylabel('$\\mu_{ua}$ [-] / $\\zeta_a$ [m]')
+
+#plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}, $Hs=' + str(H_s) + '\,m$, $Tp=' + str(T_p) + '\,s$', color=color_BBGreen)
+#plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
+
+plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
+plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}', color=color_BBPurple)
+#plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$|\hat{\eta}_{7}|\,[-] /\zeta_a\,[m]$')
 x_min = 0.
 plt.xlim([x_min, 16])
 plt.ylim([0, np.max(mu_ua_nondim[f_encounter > x_min])])
 plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/Comparison RAOs/uniform pressure.pdf', bbox_inches='tight')
 plt.show()
 
 df_vert_acc = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Vert. Acc. AP/vertical_acc_AP_RAO_nice_format.csv')
@@ -504,14 +516,19 @@ for i in range(n_freq):
     if zeta_a[i] > 1e-20:
         vert_acc_AP_nondim[i] = np.absolute(omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i])) / zeta_a[i]  # / 1  #
 
-plt.plot(f_encounter, vert_acc_AP_nondim, label='This program, Hs=' + str(H_s) + 'm, Tp=' + str(T_p) + 's')
-plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label='Steen and Faltinsen (1995), Hs=0.15m, Tp=1.5s')
+#plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}, $Hs=' + str(H_s) + '\,m$, $Tp=' + str(T_p) + '\,s$', color=color_BBGreen)
+#plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
+
+plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
+plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}', color=color_BBPurple)
 plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > x_min])])
-plt.title('Comparison with Steen and Faltinsen (1995)')
-plt.xlabel('Encounter frequency [Hz]')
-plt.ylabel('Vert. Acc. $[m/s^2]$ / $\\zeta_a [m]$')
+#plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'\textrm{Vert. acc.} $\,[m/s^2] / \zeta_a\,[m]$')
 plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/Comparison RAOs/vert_acc_bow.pdf', bbox_inches='tight')
 plt.show()
 
 
