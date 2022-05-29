@@ -477,6 +477,42 @@ def read_group_of_re8_input(filepath):
 
     return f_ex, VEL, HEAD, omega_0, XMTN, ZMTN
 
+
+def read_group_of_re1_input(filepath):
+    if not Path(filepath + '/Run ' + str(1) + '/input.re1').is_file():
+        return
+
+    RETRANS_temp, IMTRANS_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN = read_re1_file(filepath + '/Run ' + str(1) + '/input.re1')
+
+
+    raos = np.zeros([6, len(FREQ_temp)], dtype=complex)
+
+    omega_0 = FREQ_temp
+
+    for i in range(6):
+        for j in range(len(FREQ_temp)):
+            raos[i, j] = RETRANS_temp[i, j, 0, 0] + 1j * IMTRANS_temp[i, j, 0, 0]
+
+    counter = 2
+
+    while Path(filepath + '/Run ' + str(counter) + '/input.re1').is_file():
+        RETRANS_temp, IMTRANS_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN = read_re1_file(
+            filepath + '/Run ' + str(counter) + '/input.re1')
+
+        raos_temp = np.zeros([6, len(FREQ_temp)], dtype=complex)
+
+        for i in range(6):
+            for j in range(len(FREQ_temp)):
+                raos_temp[i, j] = RETRANS_temp[i, j, 0, 0] + 1j * IMTRANS_temp[i, j, 0, 0]
+
+        raos = np.hstack((raos_temp.copy(), raos))
+        omega_0 = np.append(FREQ_temp.copy(), omega_0)
+
+        counter += 1  # Increment for next iteration
+
+    return raos, VEL, HEAD, omega_0, XMTN, ZMTN
+
+
 def interpolate_matrices(omega, omega_lower, omega_upper, mat_lower, mat_upper):
     """
     Interpolates two (nxn) numpy arrays at two different frequencies.
