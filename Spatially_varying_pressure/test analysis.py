@@ -18,7 +18,7 @@ H_s = 0.15  # [m] significant wave height
 T_p = 1.5  # [s] wave peak period
 
 # Physical constants
-c = 331.  # [m/s] Speed of sound in air
+c = 343.  # [m/s] Speed of sound in air
 g = 9.81  # [m/s^2] Acceleration of gravity
 p_a = 101325.  # [Pa] Atmospheric pressure
 #rho_0 = 1.2796  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
