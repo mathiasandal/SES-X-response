@@ -497,7 +497,7 @@ save_RAOs_for_comparison = True
 #plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
 
 plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
-plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}', color=color_BBPurple)
+plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and O. M. Faltinsen (1995)}', color=color_BBPurple)
 #plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$|\hat{\eta}_{7}|\,[-] /\zeta_a\,[m]$')
@@ -520,7 +520,7 @@ for i in range(n_freq):
 #plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
 
 plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
-plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}', color=color_BBPurple)
+plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and O. M. Faltinsen (1995)}', color=color_BBPurple)
 plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > x_min])])
 #plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')

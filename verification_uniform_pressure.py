@@ -7,7 +7,7 @@ plt.rcParams['text.usetex'] = True
 from veres import read_group_of_re1_input
 from air_cushion import wave_pumping_rect
 
-save_plots = True
+save_plots = False
 
 # Define plot colors
 color_BBGreen = '#5cb16d'
@@ -36,6 +36,13 @@ if save_plots:
     plt.savefig('Results/Verification VERES/heave against frequency.pdf', bbox_inches='tight')
 plt.show()
 
+plt.plot(omega_01/2/np.pi, np.divide(np.absolute(raos_no_air[4, :]), k), label='no air cushion', color=color_BBPurple, fillstyle='none', marker='o', linestyle='-')
+plt.plot(omega_01/2/np.pi, np.divide(np.absolute(raos_w_air[4, :]), k), label='with air cushion', color=color_BBGreen, marker='x', linestyle='-')
+plt.legend()
+plt.xlim([0, 3])
+plt.ylabel(r'$|\hat{\eta}_5|\,/\, k \zeta_a\,[-]$')
+plt.xlabel(r'$\textrm{Encounter frequency}\,[Hz]$')
+plt.show()
 
 plt.plot(omega_01/2/np.pi, np.absolute(np.multiply(np.power(omega_01, 2), raos_no_air[2, :])), label='no air cushion', color=color_BBPurple, fillstyle='none', marker='o', linestyle='-')
 plt.plot(omega_01/2/np.pi, np.absolute(np.multiply(np.power(omega_01, 2), raos_w_air[2, :])), label='with air cushion', color=color_BBGreen, marker='x', linestyle='-')
@@ -47,6 +54,13 @@ if save_plots:
     plt.savefig('Results/Verification VERES/vert acc against frequency.pdf', bbox_inches='tight')
 plt.show()
 
+plt.plot(omega_01/2/np.pi, np.divide(np.absolute(np.multiply(np.power(omega_01, 2), raos_no_air[2, :])), k), label='no air cushion', color=color_BBPurple, fillstyle='none', marker='o', linestyle='-')
+plt.plot(omega_01/2/np.pi, np.divide(np.absolute(np.multiply(np.power(omega_01, 2), raos_w_air[2, :])), k), label='with air cushion', color=color_BBGreen, marker='x', linestyle='-')
+plt.legend()
+plt.xlim([0, 7])
+plt.ylabel(r'$\textrm{Pitch acc.}\,/\,k\zeta_a\,[s^{-2}]$')
+plt.xlabel(r'$\textrm{Encounter frequency}\,[Hz]$')
+plt.show()
 
 plt.plot(wavelength, np.absolute(raos_no_air[2, :]), label='no air cushion', color=color_BBPurple, fillstyle='none', marker='o', linestyle='-')
 plt.plot(wavelength, np.absolute(raos_w_air[2, :]), label='with air cushion', color=color_BBGreen, marker='x', linestyle='-')
