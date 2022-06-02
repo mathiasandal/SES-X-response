@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['text.usetex'] = True
 from veres import read_group_of_re1_input
-from air_cushion import wave_pumping_rect
+from air_cushion import wave_pumping_rect, wave_pumping_steen
 
 save_plots = False
 
@@ -99,6 +99,7 @@ y_p = -b/2
 
 omegas = np.linspace(0.1*2*np.pi, 2*np.pi*7, 10000)
 f_ex_7 = wave_pumping_rect(x_f, x_s, y_p, y_s, omegas, HEAD1)
+#f_ex_7_2 = wave_pumping_steen(L, b, omegas)
 plt.xlabel(r'$\textrm{Encounter frequency}\,[Hz]$')
 plt.ylabel(r'$|\hat{F}_{WP}|\,[m^3/s]$')
 plt.plot(omegas/2/np.pi, np.absolute(f_ex_7), color=color_BBGreen)

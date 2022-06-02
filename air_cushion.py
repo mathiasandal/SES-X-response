@@ -368,9 +368,12 @@ def wave_pumping_rect(x_f, x_s, y_p, y_s, omegas, beta, zeta_a=1, g=9.81):
     return f_ex_7
 
 
-def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega, heading, zeta_a=1, g=9.81):
-    k = omega ** 2 / g  # calculate wave number
+def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega_0, U, heading, zeta_a=1, g=9.81):
+
+    k = omega_0 ** 2 / g  # calculate wave number
     beta = np.deg2rad(heading)  # convert wave heading from degrees to radians
+    omega_e = omega_0 + U/g*omega_0**2  # encounter frequency
+
     accepted_error = 1e-9
 
     if np.abs(np.sin(beta)) < accepted_error:  # case for sin(beta) close or equal zero
@@ -425,22 +428,35 @@ def wave_pumping_sesx(x_f, x_s, y_s, x_b, omega, heading, zeta_a=1, g=9.81):
                                                   + np.exp(-1j * k * (x_f * np.cos(beta) + y_s * np.sin(beta)))
                                                   - np.exp(-1j * k * (x_f * np.cos(beta) + y_p * np.sin(beta))))
 
-    F_wp_amp = 1j * omega * zeta_a * (T_1 + T_2)
+    F_wp_amp = 1j * omega_e * zeta_a * (T_1 + T_2)
 
     return F_wp_amp
 
 
-def wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omegas, heading, zeta_a=1, g=9.81):
-    n = len(omegas)  # length of list of omegas
+def wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_0, U, heading, zeta_a=1, g=9.81):
+    n = len(omega_0)  # length of list of omegas
 
     # initialize f_ex_7
     f_ex_7 = np.zeros([n], dtype=complex)
 
     # calculate one complex force amplitude per omega
     for i in range(n):
-        f_ex_7[i] = wave_pumping_sesx(x_f, x_s, y_s, x_b, omegas[i], heading, zeta_a, g)
+        f_ex_7[i] = wave_pumping_sesx(x_f, x_s, y_s, x_b, omega_0[i], U, heading, zeta_a, g)
 
     return f_ex_7
+
+
+def wave_pumping_steen(L, b, omega_0, U=0, zeta_a=1, g=9.81):
+
+    f_wp = np.zeros([len(omega_0)], dtype=complex)
+
+    A_c  = L * b
+    k = np.power(omega_0, 2)/g
+    omega_e = omega_0 + U / g * np.power(omega_0, 2)
+
+    f_wp = A_c * zeta_a * np.multiply(omega_e, np.divide(np.sin(k * L / 2), k * L / 2))
+
+    return f_wp
 
 
 if __name__ == "__main__":

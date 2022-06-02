@@ -56,13 +56,13 @@ if __name__ == "__main__":
     set_visualization_settings()
 
     # Refinement of the mesh
-    dx = 0.1  # [m]
-    dy = 0.1  # [m]
+    dx = 0.05  # [m]
+    dy = 0.05  # [m]
 
-    heading = 90  # [deg] wave heading relative to positive x-direction
-    zeta_a = 1  # [m] wave amplitude
+    heading = 0  # [deg] wave heading relative to positive x-direction
+    zeta_a = 0.1  # [m] wave amplitude
     g = 9.81  # [m/s^2] acceleration of gravity
-    wavelength = 3.83  # [m] wavelength og regular incident wave
+    wavelength = 10.3  # [m] wavelength og regular incident wave
     k = 2*np.pi / wavelength  # [m^-1] wave number
     frequency = np.sqrt(g * k)  # [rad/s] incident wave frequency
     t = 0  #0.10*2*np.pi/frequency  #  [s] time instance
@@ -72,5 +72,12 @@ if __name__ == "__main__":
     cloud = pv.PolyData(points)
     surf = cloud.delaunay_2d()
     plotter = pv.Plotter(shape=(1, 1))
+
+
     plotter.add_mesh(surf, scalars=surf.points[:, 2], cmap="CET_L6")
+
+    plotter.view_xy()
+    #plotter.camera.focal_point = (0.2, 0.3, 0.3)
+    #plotter.camera.up = (0.0, 1.0, 0.0)
+    plotter.camera.zoom(1.2)
     plotter.show()
