@@ -193,7 +193,7 @@ def read_re7_file(filename):
 
                 # Read in viscous roll damping
                 VISCDL[i, j, k], VISCDN[i, j, k], VISCDNL[i, j, k] = [float(i) for i in f.readline().split()]
-    return VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, NDOF
+    return VMAS, ADDMAS, DAMP, REST, VEL, HEAD, FREQ, XMTN, ZMTN, LCG, VCG, NDOF
 
 
 # TODO: Create seperate function that works on 2D strip theory and change the name of this function to something with
@@ -269,7 +269,7 @@ def read_re8_file(filename):
                         REFORCE_D1[m, k, j, i], IMFORCE_D1[m, k, j, i], REFORCE_D2[m, k, j, i], IMFORCE_D2[m, k, j, i] = \
                             [float(m) for m in f.readline().split()][1:]
 
-    return REFORCE, IMFORCE, VEL, HEAD, FREQ, XMTN, ZMTN
+    return REFORCE, IMFORCE, VEL, HEAD, FREQ, XMTN, ZMTN, LCG, VCG
 
 
 def iterate_natural_frequencies(wave_frequencies, velocity, heading, added_mass, mass, restoring, g=9.81, tolerance=1e-5):
@@ -417,7 +417,7 @@ def read_group_of_re7_input(filepath):
     if not Path(filepath + '/Run ' + str(1) + '/input.re7').is_file():
         return
 
-    M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, NDOF = \
+    M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, lcg_veres, vcg_veres, NDOF = \
         read_re7_file(filepath + '/Run ' + str(1) + '/input.re7')
 
     # Clean up matrices
@@ -430,7 +430,7 @@ def read_group_of_re7_input(filepath):
 
     while Path(filepath + '/Run ' + str(counter) + '/input.re7').is_file():
 
-        M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, NDOF = \
+        M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_temp, XMTN, ZMTN, lcg_veres, vcg_veres, NDOF = \
             read_re7_file(filepath + '/Run ' + str(counter) + '/input.re7')
 
         # Append hydrodynamic coefficients and frequencies
@@ -441,14 +441,14 @@ def read_group_of_re7_input(filepath):
 
         counter += 1  # Increment for next iteration
 
-    return M, A, B, C, VEL, HEAD, omega_0, XMTN, ZMTN, NDOF
+    return M, A, B, C, VEL, HEAD, omega_0, XMTN, ZMTN, lcg_veres, vcg_veres, NDOF
 
 
 def read_group_of_re8_input(filepath):
     if not Path(filepath + '/Run ' + str(1) + '/input.re8').is_file():
         return
 
-    REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN = \
+    REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN, lcg_veres, vcg_veres = \
         read_re8_file(filepath + '/Run ' + str(1) + '/input.re8')
 
     f_ex = np.zeros([6, len(FREQ_temp)], dtype=complex)
@@ -461,7 +461,7 @@ def read_group_of_re8_input(filepath):
     counter = 2
 
     while Path(filepath + '/Run ' + str(counter) + '/input.re8').is_file():
-        REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN = \
+        REFORCE, IMFORCE, VEL, HEAD, FREQ_temp, XMTN, ZMTN, lcg_veres, vcg_veres = \
             read_re8_file(filepath + '/Run ' + str(counter) + '/input.re8')
 
         f_ex_temp = np.zeros([6, len(FREQ_temp)], dtype=complex)
@@ -475,7 +475,7 @@ def read_group_of_re8_input(filepath):
 
         counter += 1  # Increment for next iteration
 
-    return f_ex, VEL, HEAD, omega_0, XMTN, ZMTN
+    return f_ex, VEL, HEAD, omega_0, XMTN, ZMTN, lcg_veres, vcg_veres
 
 
 def read_group_of_re1_input(filepath):
@@ -511,6 +511,13 @@ def read_group_of_re1_input(filepath):
         counter += 1  # Increment for next iteration
 
     return raos, VEL, HEAD, omega_0, XMTN, ZMTN
+
+
+def read_coefficients_from_veres(path):
+    M, A, B, C, U, beta, omega_0, XMTN, ZMTN, lcg_veres, vcg_veres, NDOF = read_group_of_re7_input(path)
+    f_ex, U, beta, omega_0, XMTN, ZMTN, lcg_veres, vcg_veres = read_group_of_re8_input(path)
+
+    return A, B, C[len(omega_0)//2, :, :], f_ex, omega_0, U, beta, XMTN, ZMTN, lcg_veres, vcg_veres
 
 
 def interpolate_matrices(omega, omega_lower, omega_upper, mat_lower, mat_upper):

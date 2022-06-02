@@ -50,9 +50,9 @@ path = 'Input files/BBGreen/22kn,0.17draft,0.33trim,z-coord at waterline/'
 path_re7 = path + 'input.re7'
 path_re8 = path + 'input.re8'
 
-VMAS_veres, A_h, B_h, C_h, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re_7, NDOF = read_re7_file(path_re7)
+VMAS_veres, A_h, B_h, C_h, VEL_re7, HEAD_re7, FREQ_re7, XMTN_re7, ZMTN_re_7, lcg_veres, vcg_veres, NDOF = read_re7_file(path_re7)
 
-REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
+REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8, lcg_veres, vcg_veres = read_re8_file(path_re8)
 
 # Center of motion relative to BL and AP
 x_prime = Lpp/2 - XMTN_re7[0]
@@ -85,7 +85,7 @@ for i in range(n_frequencies):
 # compute wave pumping
 #f_7_test = 1j*wave_pumping_rect(x_b, x_s, y_p, y_s, omega_e, beta)
 f_7_test = np.ones([n_frequencies])*30
-f_7_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_e, beta)
+f_7_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_0, U, beta)
 
 f_7 = f_7_wp
 
