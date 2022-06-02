@@ -512,9 +512,11 @@ plt.show()
 df_vert_acc = pd.read_csv('C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Vert. Acc. AP/vertical_acc_AP_RAO_nice_format.csv')
 
 vert_acc_AP_nondim = np.zeros([n_freq])
+vert_motion_AP_nondim = np.zeros([n_freq])
 for i in range(n_freq):
     if zeta_a[i] > 1e-20:
         vert_acc_AP_nondim[i] = np.absolute(omega_e[i]**2 * (eta_3a[i] + L/2 * eta_5a[i])) / zeta_a[i]  # / 1  #
+        vert_motion_AP_nondim[i] = np.absolute((eta_3a[i] + L/2 * eta_5a[i])) / zeta_a[i]
 
 #plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}, $Hs=' + str(H_s) + '\,m$, $Tp=' + str(T_p) + '\,s$', color=color_BBGreen)
 #plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
@@ -531,19 +533,29 @@ if save_RAOs_for_comparison:
     plt.savefig('Results/Comparison RAOs/vert_acc_bow.pdf', bbox_inches='tight')
 plt.show()
 
+plt.plot(f_encounter, vert_motion_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
+plt.xlim([x_min, 16.])
+plt.ylim([0, np.max(vert_motion_AP_nondim[f_encounter > x_min])])
+#plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'\textrm{Vert. motion} $\,[m] / \zeta_a\,[m]$')
+plt.legend()
+plt.show()
 
 # Plotting wave spectrum
-plotWaveSpectrum = False
+plotWaveSpectrum = True
 if plotWaveSpectrum:
 
     f_e_PM = np.linspace(0.1, 50, 1000)
     omega_0_PM = g/2/U*(np.sqrt(1 + 8*np.pi*U/g*f_e_PM) - 1)
-    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
+    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p), color=color_BBGreen)
 
     #plt.plot(f_encounter, PM_spectrum(omega_0, H_s, T_p))
-    plt.xlabel('Encounter frequency [Hz]')
-    plt.ylabel('$S_{\\zeta}$')
-    plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
+    plt.xlabel(r'\textrm{Encounter frequency\,[Hz]}')
+    plt.ylabel(r'$S_{\zeta}\,[m^2s]$')
+    plt.xlim([0.1, 50])
+    #plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
+    plt.savefig('Results/Comparison RAOs/mod_PM_spectrum.pdf', bbox_inches='tight')
     plt.show()
 
     #plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
