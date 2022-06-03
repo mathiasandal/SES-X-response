@@ -252,7 +252,7 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     a_0_AP = np.maximum(A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP), 0)  # , 0.5) #
     a_0_FP = np.maximum(A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP), 0)  # , 0.5) #
 
-    j_max = 2  # number of acoustic modes to include in the calculations
+    j_max = 5  # number of acoustic modes to include in the calculations
 
     A_mat = np.zeros([3, 3, n_freq], dtype=complex)  # initialize coefficient matrix for linear system of eq.
     f_vec = np.zeros([3, n_freq], dtype=complex)  # initialize column vector on the right hand side of the equation
@@ -517,39 +517,72 @@ plt.show()
 df_vert_acc = pd.read_csv(
     'C:/Users/mathi/OneDrive - NTNU/Master Thesis/Spatially varying pressure/Results from Steen and Faltinsen (1995)/Rigid panel model/Vert. Acc. AP/vertical_acc_AP_RAO_nice_format.csv')
 
-vert_acc_AP_nondim = np.zeros([n_freq])
-vert_motion_AP_nondim = np.zeros([n_freq])
+vert_acc_FP_nondim = np.zeros([n_freq])
+vert_motion_FP_nondim = np.zeros([n_freq])
 for i in range(n_freq):
     if zeta_a[i] > 1e-20:
-        vert_acc_AP_nondim[i] = np.absolute(omega_e[i] ** 2 * (eta_3a[i] + L / 2 * eta_5a[i])) / zeta_a[i]  # / 1  #
-        vert_motion_AP_nondim[i] = np.absolute((eta_3a[i] + L / 2 * eta_5a[i])) / zeta_a[i]
+        vert_acc_FP_nondim[i] = np.absolute(omega_e[i] ** 2 * (eta_3a[i] - L / 2 * eta_5a[i])) / zeta_a[i]  # / 1  #
+        vert_motion_FP_nondim[i] = np.absolute((eta_3a[i] - L / 2 * eta_5a[i])) / zeta_a[i]
 
-
-
-plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
+plt.plot(f_encounter, vert_acc_FP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
 plt.xlim([x_min, 16.])
-plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > x_min])])
-# plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
+plt.ylim([0, np.max(vert_acc_FP_nondim[f_encounter > x_min])])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'\textrm{Vert. acc.} $\,[m/s^2] / \zeta_a\,[m]$')
 plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/vert_acc_bow.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/vert acc bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
-plt.plot(f_encounter, vert_motion_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
+plt.plot(f_encounter, vert_motion_FP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
 plt.xlim([x_min, 16.])
-plt.ylim([0, np.max(vert_motion_AP_nondim[f_encounter > x_min])])
-# plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
+plt.ylim([0, np.max(vert_motion_FP_nondim[f_encounter > x_min])])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'\textrm{Vert. motion} $\,[m] / \zeta_a\,[m]$')
 plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/RAOs/vert motion bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
+# Heave RAO
+plt.plot(f_encounter, np.absolute(eta_3a), label=r'\textrm{Computed}', color=color_BBGreen)
+plt.xlim([x_min, 16.])
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
+plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/RAOs/heave against encounter frequency.pdf', bbox_inches='tight')
+plt.show()
+
+plt.plot(water_wavelength, np.absolute(eta_3a), label=r'\textrm{Computed}', color=color_BBGreen)
+plt.xlim([x_min, 50.])
+plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
+plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
+plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/RAOs/heave against wavelength.pdf', bbox_inches='tight')
+plt.show()
+
+# Pitch RAO
+plt.plot(f_encounter, np.absolute(np.divide(eta_5a, k)), label=r'\textrm{Computed}', color=color_BBGreen)
+plt.xlim([x_min, 16.])
+#plt.ylim([0, np.max(vert_motion_FP_nondim[f_encounter > x_min])])
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
+plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/RAOs/pitch against encounter frequency.pdf', bbox_inches='tight')
+plt.show()
+
+plt.plot(water_wavelength, np.absolute(np.divide(eta_5a, k)), label=r'\textrm{Computed}', color=color_BBGreen)
+plt.xlim([x_min, 50.])
+plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
+plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
+plt.legend()
+if save_RAOs_for_comparison:
+    plt.savefig('Results/RAOs/pitch against wavelength.pdf', bbox_inches='tight')
+plt.show()
 
 print('The iteration scheme converged after', counter)
 print('Relative error:\t\t', rel_err)
 print('Absolute error:\t\t', abs_err)
-
-# plt.plot(np.abs(eta_3_test))
-# plt.show()
