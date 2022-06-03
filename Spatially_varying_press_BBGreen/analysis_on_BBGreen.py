@@ -6,9 +6,7 @@ from air_cushion import air_cushion_area, read_fan_characteristics, interpolate_
 plt.rcParams['text.usetex'] = True
 from veres import read_coefficients_from_veres
 from utilitiesBBGreen import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
-    A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
-    append_spatially_varying_terms, PM_spectrum
-from Spatially_varying_pressure.HyCoef import compute_hydrodynamic_coeff
+    A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, PM_spectrum
 
 """Implementation of analysis with spatially varying pressure with the same input as in p. 35 in Steen and Faltinsen (1995). 'Cobblestone
     Oscillations of an SES with Flexible Bag Aft Seal'
@@ -73,7 +71,7 @@ Q_0, dQdp_0 = interpolate_fan_characteristics(p_0, P, Q)
 
 # Read input.re7 file to get hydrodynamic coefficients
 
-veres_formulation = 'high-speed'  # 'strip-theory'  #
+veres_formulation = 'high-speed'  #'strip-theory'  #
 if veres_formulation == 'high-speed':
     # For high-speed formulation
     path_high_speed_theory = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_hs_theory/DWL'
@@ -119,15 +117,15 @@ M[1, 1] = r55**2 * m  # [kg m^2] I_55
 
 
 # Other parameters
-h_s_AP = 0.1  # [m] aft seal submergence
+h_s_AP = 0.2  # [m] aft seal submergence
 h_s_FP = 0.1  # [m] bow seal submergence
 # Centroid of the air cushion at equilibrium relative to the motion coord. system
 x_cp = x_prime - x_B_c  # [m] longitudinal position
 y_cp = 0  # [m] transverse position
 z_cp = -h / 2  # [m] vertical position
-x_g_AP = -L / 2 - x_cp  # [m] position of leakage at AP relative to center of gravity
-x_g_FP = L / 2 - x_cp  # [m] position of leakage at FP relative to center of gravity
-lcg_fan = 5.6 - x_cp  # [m] Longitudinal fan position (from CG)  # TODO: Make sure this is correct
+x_g_AP = L / 2 - x_cp  # [m] position of leakage at AP relative to center of gravity
+x_g_FP = -L / 2 - x_cp  # [m] position of leakage at FP relative to center of gravity
+lcg_fan = L/2 - x_F_c - x_cp  # [m] Longitudinal fan position (from CG)  # TODO: Make sure this is correct
 
 # Excitation
 F_3a = f_ex_temp[2, :]
@@ -234,7 +232,7 @@ epsi = 1e-6  # [-] allowed error in stopping criteria for iteration process
 rel_err = -1  # [-] initialize error variable to start while-loop
 abs_err = -1
 counter = 0  # initialize counter in while-loop
-max_iter = 100  # maximum number of iterations
+max_iter = 101  # maximum number of iterations
 
 eta_3_test = []
 
@@ -300,15 +298,6 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
         b_5j = B_5j(k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
         b_7j = B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP)
 
-        '''
-        # Deep copy for debugging  #TODO: Remove this
-        temp_mat = A_mat.copy()
-        temp_vec = f_vec.copy()
-
-        ''''''
-        append_spatially_varying_terms(temp_mat, temp_vec, omega_e, j, b, L, rho_0, p_0, dQdp_0, lcg_fan, k_2_AP, a_0_AP
-                                       , x_g_AP, k_2_FP, a_0_FP, x_g_FP, zeta_a, a_0j, a_3j, a_5j, a_7j, b_0j, b_3j, b_5j, b_7j)
-        '''
 
         if j % 2 == 1:  # if j is odd
             # ***** Pitching moments due to spatially varying pressure in eq. (88) in Steen and Faltinsen (1995)
@@ -427,16 +416,6 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
             f_vec[2, :] -= (-rho_0 * p_0 * dQdp_0) * (-rho_0 / p_0) * 1j * np.multiply(
                 np.multiply(omega_e, b_7j) * r_j(lcg_fan + x_cp, j, L), zeta_a)
 
-        ''' # TODO: Remove this
-        test_mat = temp_mat - A_mat
-        test_vec = temp_vec - f_vec
-
-        print('Compare matrices:')
-        print(temp_mat == A_mat)
-        print('Compare vector:')
-        print(temp_vec == f_vec)
-        print('hei')
-        '''
 
         # Solves linear system of equations for each frequency
         eta_3a, eta_5a, mu_ua = solve_linear_systems_of_eq(A_mat, f_vec)
@@ -499,15 +478,6 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
         n_B_AP = N_B(b_L_AP, sigma_L_AP)
         n_B_FP = N_B(b_L_FP, sigma_L_FP)
 
-'''
-plt.plot(f_encounter, np.abs(eta_3a), 'x-', label='$\\eta_3$')
-plt.plot(f_encounter, np.abs(eta_5a), 'x-',  label='$\\eta_5$')
-plt.plot(f_encounter, np.abs(mu_ua), 'x-',  label='$\\mu_{ua}$')
-plt.xlabel('Encounter frequency [Hz]')
-plt.xlim([0, 16])
-plt.legend()
-plt.show()
-'''
 
 # Store results
 store_results = False
@@ -531,16 +501,9 @@ for i in range(n_freq):
     if zeta_a[i] > 1e-20:
         mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]  # 1 #
 
-save_RAOs_for_comparison = False
-# plt.plot(f_encounter, np.abs(mu_ua), label='This program')
-
-# plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}, $Hs=' + str(H_s) + '\,m$, $Tp=' + str(T_p) + '\,s$', color=color_BBGreen)
-# plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
+save_RAOs_for_comparison = True
 
 plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
-plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and O. M. Faltinsen (1995)}',
-         color=color_BBPurple)
-# plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$|\hat{\eta}_{7}|\,[-] /\zeta_a\,[m]$')
 x_min = 0.
@@ -548,7 +511,7 @@ plt.xlim([x_min, 16])
 plt.ylim([0, np.max(mu_ua_nondim[f_encounter > x_min])])
 plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/Comparison RAOs/uniform pressure.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/uniform pressure.pdf', bbox_inches='tight')
 plt.show()
 
 df_vert_acc = pd.read_csv(
@@ -561,12 +524,9 @@ for i in range(n_freq):
         vert_acc_AP_nondim[i] = np.absolute(omega_e[i] ** 2 * (eta_3a[i] + L / 2 * eta_5a[i])) / zeta_a[i]  # / 1  #
         vert_motion_AP_nondim[i] = np.absolute((eta_3a[i] + L / 2 * eta_5a[i])) / zeta_a[i]
 
-# plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}, $Hs=' + str(H_s) + '\,m$, $Tp=' + str(T_p) + '\,s$', color=color_BBGreen)
-# plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and Faltinsen (1995)}, $Hs=0.15\,m$, $Tp=1.5\,s$', color=color_BBPurple)
+
 
 plt.plot(f_encounter, vert_acc_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
-plt.plot(df_vert_acc.iloc[:, 1], df_vert_acc.iloc[:, 2], label=r'\textrm{Steen and O. M. Faltinsen (1995)}',
-         color=color_BBPurple)
 plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > x_min])])
 # plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
@@ -574,7 +534,7 @@ plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'\textrm{Vert. acc.} $\,[m/s^2] / \zeta_a\,[m]$')
 plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/Comparison RAOs/vert_acc_bow.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/vert_acc_bow.pdf', bbox_inches='tight')
 plt.show()
 
 plt.plot(f_encounter, vert_motion_AP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
@@ -586,22 +546,6 @@ plt.ylabel(r'\textrm{Vert. motion} $\,[m] / \zeta_a\,[m]$')
 plt.legend()
 plt.show()
 
-# Plotting wave spectrum
-plotWaveSpectrum = False
-if plotWaveSpectrum:
-    f_e_PM = np.linspace(0.1, 50, 1000)
-    omega_0_PM = g / 2 / U * (np.sqrt(1 + 8 * np.pi * U / g * f_e_PM) - 1)
-    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p), color=color_BBGreen)
-
-    # plt.plot(f_encounter, PM_spectrum(omega_0, H_s, T_p))
-    plt.xlabel(r'\textrm{Encounter frequency\,[Hz]}')
-    plt.ylabel(r'$S_{\zeta}\,[m^2s]$')
-    plt.xlim([0.1, 50])
-    # plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
-    plt.savefig('Results/Comparison RAOs/mod_PM_spectrum.pdf', bbox_inches='tight')
-    plt.show()
-
-    # plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
 
 print('The iteration scheme converged after', counter)
 print('Relative error:\t\t', rel_err)
