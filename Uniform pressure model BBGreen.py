@@ -1,7 +1,10 @@
-from veres import read_group_of_re7_input, read_group_of_re8_input, read_coefficients_from_veres
+from veres import read_coefficients_from_veres
 from air_cushion import air_cushion_area, read_fan_characteristics, interpolate_fan_characteristics, \
     wave_pumping_excitation_sesx
+import scipy.linalg as la
 import numpy as np
+import matplotlib.pyplot as plt
+plt.rcParams['text.usetex'] = True
 
 # ***** Physical parameters *****
 rho = 1025  # [kg/m^3] density of sea water
@@ -28,7 +31,6 @@ p_0 = 3500  # [Pa] mean excess pressure in the air cushion
 h_0 = 0.64  #2 # [m]  Height of the air cushion  # TODO: make sure this value is correct
 h = p_0 / rho / g  # [m] Difference in water level inside and outside the air cushion
 
-
 # Compute area and longitudinal position of centroid relative to AP
 A_c0, x_B_c = air_cushion_area(l_1, l_2, b)
 
@@ -42,7 +44,7 @@ Q_0, dQdp_0 = interpolate_fan_characteristics(p_0, P, Q)
 
 # Read hydrodynamic coefficients and loads from VERES
 
-veres_formulation = 'strip-theory'  #'high-speed'  #
+veres_formulation = 'high-speed'  # 'strip-theory'  #
 if veres_formulation == 'high-speed':
     # For high-speed formulation
     path_high_speed_theory = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_hs_theory/DWL'
@@ -52,8 +54,10 @@ else:
     path_strip_theory = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_strip_theory/DWL'
     A_temp, B_temp, C_temp, f_ex_temp, omega_0, U, beta, XMTN, ZMTN, lcg_veres, vcg_veres = read_coefficients_from_veres(path_strip_theory)
 
+k = np.power(omega_0, 2) / g
 omega_e = omega_0 + U / g * np.multiply(np.power(omega_0, 2), np.cos(np.rad2deg(beta)))  # [rad/s] encounter freq.
 f_enc = omega_e / 2 / np.pi  # [Hz] encounter frequency
+k_enc = np.power(omega_e, 2) / g
 
 # Initialize vectors for hydrodynamic coeffs. and loads
 A = np.zeros([len(omega_0), 3, 3])
@@ -129,5 +133,77 @@ raos = np.zeros([3, len(omega_0)], dtype=complex)
 
 for i in range(len(omega_0)):
     raos[:, i] = np.linalg.solve(-omega_e[i]**2*(A[i] + M) + 1j * omega_e[i] * B[i] + C, f_ex[:, i])
+
+# Iterate natural frequencies
+nat_freq, eigen_modes = la.eig(C, M + A[999])
+
+f_03 = np.sqrt(nat_freq[0])/2/np.pi
+f_05 = np.sqrt(nat_freq[1])/2/np.pi
+
+# Heave and pitch resonance
+def it_nat_freq(M, A_vec, C, omega_e, g=9.81):
+
+    A_temp = A_vec[len(omega_e) // 2]
+
+    omega_nat_old = np.sqrt(C / (M + A_temp))
+
+    err = -1
+    epsi = 1e-6
+    counter = 1
+
+    while err > epsi or counter == 1 or counter > 100:
+
+        A_temp = np.interp(omega_nat_old, omega_e, A_vec)
+
+        omega_nat = np.sqrt(C / (M + A_temp))
+
+        err = np.abs((omega_nat - omega_nat_old)/omega_nat_old)
+
+        omega_nat_old = omega_nat
+
+        counter += 1
+
+    return omega_nat
+
+# heave - iterated
+omega_03_BBGreen_it = it_nat_freq(M[0, 0], A[:, 0, 0], C[0, 0], omega_e)
+f_03_it = omega_03_BBGreen_it / 2 / np.pi
+
+# pitch - iterated
+omega_05_it = it_nat_freq(M[1, 1], A[:, 1, 1], C[1, 1], omega_e)
+f_05_it = omega_05_it / 2 / np.pi
+
+# Plotting RAOs
+
+# Define plot colors
+color_BBGreen = '#5cb16d'
+color_BBPurple = '#b15ca0'
+
+plt.plot(f_enc, np.absolute(A[:, 0, 0]), color=color_BBGreen)
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.show()
+
+# heave
+
+plt.plot(f_enc, np.absolute(raos[0]), color=color_BBGreen)
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$|\hat{\eta}_3|\,/\,\zeta_a\,[-]$')
+plt.show()
+
+plt.plot(f_enc, np.divide(np.absolute(raos[1]), k), color=color_BBGreen)
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$|\hat{\eta}_5|\,/\,k \zeta_a\,[-]$')
+plt.show()
+
+plt.plot(f_enc, np.absolute(raos[2]), color=color_BBGreen)
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$|\hat{\eta}_7|\,[-]$')
+plt.show()
+
+plt.plot(f_enc, np.absolute(np.multiply(raos[0], np.power(omega_e, 2))), color=color_BBGreen)
+plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+plt.ylabel(r'$|\omega_e^2\hat{\eta}_3|\,/\,\zeta_a\,[-]$')
+plt.show()
+
 
 

@@ -46,20 +46,20 @@ def it_nat_freq(M, A_vec, C, omega_e, g=9.81):
 
 # read restoring and added mass coefficients
 # BBGreen at 22kn
-path_BBGreen = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen/DWL'
-M_temp, A_BBGreen, B_BBGreen, C_BBGreen, VEL_BBGreen, HEAD_BBGreen, FREQ_BBGreen, XMTN_BBGreen, ZMTN_BBGreen, NDOF_BBGreen = read_group_of_re7_input(path_BBGreen)
+path_BBGreen = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_strip_theory/DWL'
+M_temp, A_BBGreen, B_BBGreen, C_BBGreen, VEL_BBGreen, HEAD_BBGreen, FREQ_BBGreen, XMTN_BBGreen, ZMTN_BBGreen, lcg, vcg, NDOF_BBGreen = read_group_of_re7_input(path_BBGreen)
 omega_enc_BBGreen = FREQ_BBGreen + VEL_BBGreen / g * np.power(FREQ_BBGreen, 2)
 f_enc_BBGreen = omega_enc_BBGreen / 2 / np.pi
 
 # Conceptual 35m at 50kn
 path_35m = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
-M_temp, A_35m, B_35m, C_35m, VEL_35m, HEAD_35m, FREQ_35m, XMTN_35m, ZMTN_35m, NDOF_35m = read_group_of_re7_input(path_35m)
+M_temp, A_35m, B_35m, C_35m, VEL_35m, HEAD_35m, FREQ_35m, XMTN_35m, ZMTN_35m, lcg, vcg, NDOF_35m = read_group_of_re7_input(path_35m)
 omega_enc_35m = FREQ_35m + VEL_35m / g * np.power(FREQ_35m, 2)
 f_enc_35m = omega_enc_35m / 2 / np.pi
 
 # Conceptual 20m at 0kn
 path_20m = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_SES_20m_no_air_cushion/DWL'
-M_temp, A_20m, B_20m, C_20m, VEL_20m, HEAD_20m, FREQ_20m, XMTN_20m, ZMTN_20m, NDOF_20m = read_group_of_re7_input(path_20m)
+M_temp, A_20m, B_20m, C_20m, VEL_20m, HEAD_20m, FREQ_20m, XMTN_20m, ZMTN_20m, lcg, vcg, NDOF_20m = read_group_of_re7_input(path_20m)
 omega_enc_20m = FREQ_20m + VEL_20m / g * np.power(FREQ_20m, 2)
 f_enc_20m = omega_enc_20m / 2 / np.pi
 
