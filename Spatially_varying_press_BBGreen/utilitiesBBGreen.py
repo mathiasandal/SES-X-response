@@ -88,7 +88,7 @@ def A_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to change heave DOF
     """
-    return 2 * k_4 / L * (k_2_AP * n_R_AP - k_2_FP * n_R_FP)
+    return -2 * k_4 / L * (k_2_AP * n_R_AP - k_2_FP * n_R_FP)
 
 
 def B_3j(L, k_4, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
@@ -184,8 +184,8 @@ def A_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of odd mode j due to water waves
     """
-    return -1j*4*k_4/L * k * np.cos(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
-        1j*2*k_4/L * (k_2_AP*n_R_AP*np.exp(-1j*k*L/2) - k_2_FP*n_R_FP*np.exp(1j*k*L/2))
+    return -1j*4*k_4/L * k * np.cos(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e + \
+        2*k_4/L * (k_2_FP*n_R_FP*np.exp(1j*k*L/2) - k_2_AP*n_R_AP*np.exp(-1j*k*L/2))
 
 
 def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
@@ -213,8 +213,8 @@ def B_7j(j, k_4, L, k, omega_e, k_2_AP, k_2_FP, n_R_AP, n_R_FP):
     :return: (double)
         Frequency dependent modal amplitude of even mode j due to water waves
     """
-    return -4*k_4/L * k * np.sin(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e - \
-        1j*2*k_4/L * (k_2_AP*n_R_AP*np.exp(-1j*k*L/2) + k_2_FP*n_R_FP*np.exp(1j*k*L/2))
+    return -4*k_4/L * k * np.sin(k*L/2) / (k**2 - (j*np.pi/L)**2) * omega_e + \
+        2*k_4/L * (k_2_FP*n_R_FP*np.exp(1j*k*L/2) + k_2_AP*n_R_AP*np.exp(-1j*k*L/2))
 
 # Computing constants used in derivation of equations
 
