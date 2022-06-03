@@ -49,7 +49,7 @@ dQdp_0 = -140.  # [m^2/s] Linear fan slope
 dQdp_0 = dQdp_0 / rho_w / g  # [(m^3/s)/Pa] Linear fan slope
 
 
-x_F = 0  # [m]
+x_F = 5.6  # [m]
 
 # Calculate initial density of air in air cushion
 rho_0 = rho_a*((p_0 + p_a)/p_a)**(1/gamma)  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
@@ -85,10 +85,10 @@ C_test = C_n[0, 0, :, :, :]
 #filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_high_speed/DWL'
 # Strip-theory formulation
 filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
-M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, NDOF = read_group_of_re7_input(filepath)
+M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, lcg, vcg, NDOF = read_group_of_re7_input(filepath)
 
 # Read input.re8 file to get excitation
-f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_group_of_re8_input(filepath)
+f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8, lcg, vcg = read_group_of_re8_input(filepath)
 
 #REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
 

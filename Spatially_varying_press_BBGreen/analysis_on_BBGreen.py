@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from air_cushion import air_cushion_area, read_fan_characteristics, interpolate_fan_characteristics, \
+    wave_pumping_excitation_sesx
 plt.rcParams['text.usetex'] = True
-from veres import read_re8_file, read_re7_file, read_group_of_re7_input, read_group_of_re8_input
+from veres import read_coefficients_from_veres
 from utilitiesBBGreen import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value_relation, A_0_AP, A_0_FP, A_0j, A_3j, A_5j, \
     A_7j, B_0j, B_3j, B_5j, B_7j, r_j, solve_linear_systems_of_eq, N_R, N_B, rms_leakage, Zeta_a, \
     append_spatially_varying_terms, PM_spectrum
@@ -31,100 +32,107 @@ rho_w = 1025.  # [kg/m^3] Density of salt water
 rho = 1000.  # [kg/m^3] Density of fresh water
 gamma = 1.4  # [-] Ratio of specific heat of air at adiabatic condition
 
-# SES main dimensions
-L_oa = 35.  # [m] Length overall
-L = 28.  # [m] Air cushion length
-b_s = 0.5  # [m] Beam of side hulls
-b = 8.  # [m] Air cushion beam
-m = 140.  # [tons] Vessel total mass
-m = m * 1e3  # [kg] Vessel total mass
-h_0 = 2.0  # [m] Cushion height
-U = 50.  # [knots] Velocity
-U = U * 0.514444  # [m/s] Velocity
+# main dimensions of BBGreen
+B = 6  # [m] beam of BBGreen
+Lpp = 19.2  # [m] L_pp of BBGreen
+L = 18  # [m] Air cushion length
+m = 25.6e3  # [kg] total mass of the vessel
+r44 = 0.35 * B  # [m] radii of gyration in roll
+r55 = 0.25 * Lpp  # [m] radii of gyration in pitch
+r66 = 0.27 * Lpp  # [m] radii of gyration in yaw
+r46 = 0  # [m] radii of gyration for inertial coupling of yaw and roll
+lcg = 7.83  # [m] longitudinal center of gravity relative to AP
+vcg = 1.98  # [m] vertical center of gravity relative to BL
 
-# Fan characteristics
-p_0 = 500.  # [mmWc] Mean cushion pressure
-p_0 = rho_w * g * p_0 * 1e-3  # [Pa] Mean cushion pressure
-Q_0 = 150.  # [m^3/s] Mean fan flow rate
-dQdp_0 = -140.  # [m^2/s] Linear fan slope
-dQdp_0 = dQdp_0 / rho_w / g  # [(m^3/s)/Pa] Linear fan slope
+# Properties of SES-X air cushion
+l_1 = 12   # 0.0001  #     [m] length of the rectangular part of the air cushion
+l_2 = 6  # 0.001  #      [m] length of the triangular part of the air cushion
+b = 3.4  # [m] beam of the air cushion
+p_0 = 3500  # [Pa] mean excess pressure in the air cushion
+h_0 = 0.64  #2 # [m]  Height of the air cushion  # TODO: make sure this value is correct
+h = p_0 / rho / g  # [m] Difference in water level inside and outside the air cushion
 
-x_F = 0  # [m]
+x_F_c = 17.7  # [m]  Distance from AP to fan inlet  # Measured in Rhino7
 
 # Calculate initial density of air in air cushion
 rho_0 = rho_a * ((p_0 + p_a) / p_a) ** (1 / gamma)  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
 
-# Other parameters
-h_s_AP = 0.1  # [m] aft seal submergence
-h_s_FP = 0.1  # [m] bow seal submergence
-x_cp = 0  # [m] longitudinal centroid of air cushion relative to CoG(?)  #TODO: Make sure this is correct
-x_g_AP = -L / 2 - x_cp  # [m] position of leakage at AP relative to center of gravity
-x_g_FP = L / 2 - x_cp  # [m] position of leakage at FP relative to center of gravity
-lcg_fan = 5.6 - x_cp  # [m] Longitudinal fan position (from CG)
-# Derived parameters
-A_c = L * b  # [m^2] Air cushion area  # TODO: Might want to use expression for rectangular cushion shape with triangle at the front
+
+# Compute area and longitudinal position of centroid relative to AP
+A_c0, x_B_c = air_cushion_area(l_1, l_2, b)
+
+V_c0 = A_c0 * h_0  # [m^3] Compute mean air cushion volume  # TODO: Make sure this is correct
+
+# Read in fan characteristics
+Q, P, rpm_dummy = read_fan_characteristics('C:/Users/mathi/code/repos/SES-X-response/Input files/fan characteristics/fan characteristics.csv', '1800rpm')
+
+# Interpolates values
+Q_0, dQdp_0 = interpolate_fan_characteristics(p_0, P, Q)
 
 # ***** Read hydrodynamic coefficients for conceptual SES *****
 
-# Fetch hydrodynamic coefficients and loads
-# path = 'C:/Users/mathi/code/repos/SES-X-response/Spatially_varying_pressure/Input Files/Conceptual SES of 20m/0.1-16[Hz]/Run 1/'
-# path_re7 = path + 'input.re7'
-# path_re8 = path + 'input.re8'
-
 # Read input.re7 file to get hydrodynamic coefficients
-'''
-M, A_n, B_n, C_n, VEL_re7, HEAD_re7, FREQ_re7_test, XMTN_re7_test, ZMTN_re7_test, NDOF_test = read_re7_file(path_re7)
 
-# Clean up matrices
-A_test = A_n[0, 0, :, :, :]
-B_test = B_n[0, 0, :, :, :]
-C_test = C_n[0, 0, :, :, :]
-'''
+veres_formulation = 'high-speed'  # 'strip-theory'  #
+if veres_formulation == 'high-speed':
+    # For high-speed formulation
+    path_high_speed_theory = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_hs_theory/DWL'
+    A_temp, B_temp, C_temp, f_ex_temp, omega_0, U, beta, XMTN, ZMTN, lcg_veres, vcg_veres = read_coefficients_from_veres(path_high_speed_theory)
+else:
+    # For strip_theory
+    path_strip_theory = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/BBGreen_uniform_pressure_model_strip_theory/DWL'
+    A_temp, B_temp, C_temp, f_ex_temp, omega_0, U, beta, XMTN, ZMTN, lcg_veres, vcg_veres = read_coefficients_from_veres(path_strip_theory)
 
-# High-speed formulation
-# filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_high_speed/DWL'
-# Strip-theory formulation
-filepath = 'C:/Users/mathi/SIMA Workspaces/Workspace_1/Task/conceptual_35m_fine_contour_strip_theory/DWL'
-M, A_temp, B_temp, C_temp, VEL, HEAD, FREQ_re7, XMTN_re7, ZMTN_re7, lcg, vcg, NDOF = read_group_of_re7_input(filepath)
+# Add terms from VERES
+# Added mass
+A_33 = A_temp[:, 2, 2]  # A_33
+A_35 = A_temp[:, 2, 4]  # A_35
+A_53 = A_temp[:, 4, 2]  # A_53
+A_55 = A_temp[:, 4, 4]  # A_55
+# Damping
+B_33 = B_temp[:, 2, 2]  # B_33
+B_35 = B_temp[:, 2, 4]  # B_35
+B_53 = B_temp[:, 4, 2]  # B_53
+B_55 = B_temp[:, 4, 4]  # B_55
+# Restoring
+C_33 = C_temp[2, 2]  # C_33
+C_35 = C_temp[2, 4]  # C_35
+C_53 = C_temp[4, 2]  # C_53
+C_55 = C_temp[4, 4]  # C_55
+# Adjust stiffness in pitch due to change in center of gravity relative to VERES
+C_55 += m * g * (vcg_veres - vcg)  # C_55
 
-# Read input.re8 file to get excitation
-f_ex, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8, lcg, vcg = read_group_of_re8_input(filepath)
+I_55 = m * r55**2  # [kg m^2]
 
-# REFORCE, IMFORCE, VEL_re8, HEAD_re8, FREQ_re8, XMTN_re8, ZMTN_re8 = read_re8_file(path_re8)
+# Center of motion relative to BL and AP
+x_prime = Lpp/2 - XMTN[0]
+z_prime = ZMTN[0]
 
-n_freq = len(FREQ_re8)
+# Create mass matrix
+x_G = x_prime - lcg  # [m] longitudinal position of COG relative to motion coordinate system
+z_G = -(z_prime - vcg)  # [m] vertical position of COG relative to motion coordinate system
+M = np.zeros([3, 3])
+M[0, 0] = m  # [kg] M_33
+M[0, 1] = -x_G * m  # [kg m] M_35
+M[1, 0] = -x_G * m  # [kg m] M_53
+M[1, 1] = r55**2 * m  # [kg m^2] I_55
 
-C_33 = C_temp[n_freq // 2, 2, 2]
 
-C_35 = 0  # 33.  # Temporarily set to zero
-
-C_53 = 0  # 33.  # Temporarily set to zero
-
-r_55 = 0.21 * L  # [m] radii of gyration in pitch (Between 0.2*L_PP and 0.3*L_PP)
-I_55 = 2860000.  # m * r_55**2  #6860000.  #
-kb = 0.8
-zb = 0.2
-zg = 1.0
-C_55 = m * g * ((1 - kb) * zb - zg) + rho_w * g * (L_oa ** 3 * b_s / 6.0)  # Using input from SIMPACC
-# C_55 = C_temp[n_freq//2, 4, 4]
-
+# Other parameters
+h_s_AP = 0.1  # [m] aft seal submergence
+h_s_FP = 0.1  # [m] bow seal submergence
+# Centroid of the air cushion at equilibrium relative to the motion coord. system
+x_cp = x_prime - x_B_c  # [m] longitudinal position
+y_cp = 0  # [m] transverse position
+z_cp = -h / 2  # [m] vertical position
+x_g_AP = -L / 2 - x_cp  # [m] position of leakage at AP relative to center of gravity
+x_g_FP = L / 2 - x_cp  # [m] position of leakage at FP relative to center of gravity
+lcg_fan = 5.6 - x_cp  # [m] Longitudinal fan position (from CG)  # TODO: Make sure this is correct
 
 # Excitation
-# initialize array to contain complex force amplitudes
+F_3a = f_ex_temp[2, :]
+F_5a = f_ex_temp[4, :]  # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
 
-'''
-f_ex = np.zeros([6, n_freq], dtype=complex)
-
-for i in range(6):
-    for j in range(n_freq):
-        f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
-'''
-
-F_3a = f_ex[2, :]
-F_5a = -f_ex[4, :]  # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
-
-# omega_0 = np.linspace(1, 10, 1000)
-omega_0 = FREQ_re7
 k = np.power(omega_0, 2) / g  # wave number of water waves
 omega_e = omega_0 + np.power(omega_0, 2) / g * U  # encounter frequencies
 f_encounter = omega_e / 2 / np.pi  # [Hz] frequency of encounter
@@ -136,10 +144,15 @@ zeta_a = np.ones([len(omega_0)])
 water_wavelength = g / 2 / np.pi * np.power(np.divide(2 * np.pi, omega_0), 2)
 encounter_wavelength = g / 2 / np.pi * np.power(np.divide(2 * np.pi, omega_e), 2)
 
-A_33, A_35, A_53, A_55, B_33, B_35, B_53, B_55 = compute_hydrodynamic_coeff(L_oa, b_s, U, omega_0)
-
-# ***** Compute wave pumping *****
-F_wp = A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k * L / 2), k * L / 2)), zeta_a)  # 1) #
+# ***** Compute wave pumping ***** # TODO: Make sure the phase is correct/adjust centroid
+# Properties of SES-X shaped air cushion with origin in motion coordinate system
+cushion_width = b  # [m]
+x_s = x_prime  # [m]
+x_f = -(l_1 - x_prime)  # [m]
+y_s = b/2  # [m]
+y_p = -b/2  # [m]
+x_b = -(l_1 + l_2 - x_prime)  # [m]
+F_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_0, U, b)
 
 # Plot for testing:
 '''
@@ -195,7 +208,7 @@ if plot_Coefficients:
     '''
 
 # ***** Compute constants *****
-k_1 = K_1(rho_0, p_0, h_0, A_c)  # [kg] eq. (83) in Steen and Faltinsen (1995)
+k_1 = K_1(rho_0, p_0, h_0, A_c0)  # [kg] eq. (83) in Steen and Faltinsen (1995)
 
 k_2_AP = K_2(p_0, 1.0)  # [m/s] linearized equivalent outflow velocity constant at stern 1.0
 k_2_FP = K_2(p_0, 0.61)  # [m/s] linearized equivalent outflow velocity constant at bow 0.61
@@ -228,7 +241,7 @@ eta_3_test = []
 while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
     # Solve mean value relation
-    eta_3m, eta_5m, mu_um = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_FP, k_3, h_s_AP,
+    eta_3m, eta_5m, mu_um = solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c0, p_0, k_2_AP, k_2_FP, k_3, h_s_AP,
                                                       h_s_FP, C_33, C_55, C_35, C_53)
     print('eta_3m = ', eta_3m)
     print('eta_5m = ', eta_5m)
@@ -248,20 +261,20 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 
     # Assign values for coefficient matrix in solving A_mat*x_vec = f_vec, with exception of terms due to spat. varying pressure
     # Heave equation, i.e. eq. (87) Steen and Faltinsen (1995)
-    A_mat[0, 0, :] = -(m + A_33) * np.power(omega_e, 2) + B_33 * 1j * omega_e + C_33
-    A_mat[0, 1, :] = -A_35 * np.power(omega_e, 2) + B_35 * 1j * omega_e + C_35
-    A_mat[0, 2, :] = -A_c * p_0
-    f_vec[0, :] = np.multiply(F_3a, zeta_a)  # F_3a  #
+    A_mat[0, 0, :] += -np.multiply((M[0, 0] + A_33), np.power(omega_e, 2)) + 1j * np.multiply(B_33, omega_e) + C_33
+    A_mat[0, 1, :] += -np.multiply((A_35 + M[0, 1]), np.power(omega_e, 2)) + 1j * np.multiply(B_35, omega_e) + C_35
+    A_mat[0, 2, :] += -p_0 * A_c0
+    f_vec[0, :] += F_3a
 
     # Pitch equation, i.e. eq. (88) Steen and Faltinsen (1995)
-    A_mat[1, 0, :] = -np.multiply(A_53, np.power(omega_e, 2)) + 1j * np.multiply(B_53, omega_e) + C_53
-    A_mat[1, 1, :] = -np.multiply((I_55 + A_55), np.power(omega_e, 2)) + 1j * np.multiply(B_55, omega_e) + C_55
-    A_mat[1, 2, :] = A_c * p_0 * x_cp
-    f_vec[1, :] = np.multiply(F_5a, zeta_a)  # F_5a  #
+    A_mat[1, 0, :] += -np.multiply(A_53 + M[1, 0], np.power(omega_e, 2)) + 1j * np.multiply(B_53, omega_e) + C_53
+    A_mat[1, 1, :] += -np.multiply((M[1, 1] + A_55), np.power(omega_e, 2)) + 1j * np.multiply(B_55, omega_e) + C_55
+    A_mat[1, 2, :] += p_0 * x_cp * A_c0
+    f_vec[1, :] += F_5a  # F_5a  #
 
     # Equation of dynamic uniform pressure, i.e. eq. (82) Steen and Faltinsen (1995)
-    A_mat[2, 0, :] = rho_a * b * (k_2_AP * n_R_AP + k_2_FP * n_R_FP) + rho_0 * A_c * 1j * omega_e
-    A_mat[2, 1, :] = rho_a * b * L / 2 * (k_2_AP * n_R_AP - k_2_FP * n_R_FP) - rho_0 * A_c * x_cp * 1j * omega_e
+    A_mat[2, 0, :] = rho_a * b * (k_2_AP * n_R_AP + k_2_FP * n_R_FP) + rho_0 * A_c0 * 1j * omega_e
+    A_mat[2, 1, :] = rho_a * b * L / 2 * (k_2_AP * n_R_AP - k_2_FP * n_R_FP) - rho_0 * A_c0 * x_cp * 1j * omega_e
     A_mat[2, 2, :] = k_1 * 1j * omega_e + k_3
     f_vec[2, :] = rho_0 * F_wp - rho_a * b * 1j * (
                 k_2_AP * n_R_AP * np.exp(-1j * k * L / 2) + k_2_FP * n_R_FP * np.exp(1j * k * L / 2))
