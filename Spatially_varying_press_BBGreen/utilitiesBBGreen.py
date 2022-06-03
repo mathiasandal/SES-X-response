@@ -390,7 +390,7 @@ def solve_mean_value_relation(n_B_AP, n_B_FP, L, b, x_cp, A_c, p_0, k_2_AP, k_2_
     # Define system of equations
     a = np.array([[C_33, C_35, -A_c * p_0],
                   [C_53, C_55, x_cp * A_c * p_0],
-                  [rho_a*b*(k_2_AP*n_B_AP + k_2_FP*n_B_FP), rho_a*b*L/2*(k_2_AP*n_B_AP - k_2_FP*n_B_FP), k_3]])
+                  [rho_a*b*(k_2_AP*n_B_AP + k_2_FP*n_B_FP), rho_a*b*L/2*(-k_2_AP*n_B_AP + k_2_FP*n_B_FP), k_3]])  # have taken into account change in sign
 
     rank_mat = np.linalg.matrix_rank(a)
 
@@ -483,7 +483,7 @@ def rms_leakage(x, omega_0s, eta_3_amps, eta_5_amps, H_s, T_p, zeta_a, g=9.81):
 
     for i in range(len(k)):
         if zeta_a[i] > 0.0:
-            integrand[i] = np.power((np.abs(eta_3_amps[i] - x*eta_5_amps[i] + 1j*zeta_a[i]*np.exp(1j*k[i]*x))/zeta_a[i]), 2)*wave_spectrum[i]
+            integrand[i] = np.power((np.abs(eta_3_amps[i] - x*eta_5_amps[i] - zeta_a[i]*np.exp(1j*k[i]*x))/zeta_a[i]), 2)*wave_spectrum[i]  # have taking into account change in sign
     ''''''
 
     # integrand = np.multiply(np.power((np.absolute(eta_3_amps - x*eta_5_amps + 1j * zeta_a * np.exp(1j*k*x)) / zeta_a), 2), PM_spectrum(omega_0s, H_s, T_p))
@@ -511,7 +511,7 @@ def A_0_AP(L, b, n_b_AP, eta_3m, eta_5m, h_s_AP, A_c_AP=0):
     :return: (double)
         Mean leakage area at AP
     """
-    return b*n_b_AP*(eta_3m - h_s_AP + L/2*eta_5m) + A_c_AP
+    return b*n_b_AP*(eta_3m - h_s_AP - L/2*eta_5m) + A_c_AP  # Changed sign
 
 
 def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_FP, A_c_FP=0):
@@ -534,7 +534,7 @@ def A_0_FP(L, b, n_b_FP, eta_3m, eta_5m, h_s_FP, A_c_FP=0):
     :return: (double)
         Mean leakage area at FP
     """
-    return b*n_b_FP*(eta_3m - h_s_FP - L/2*eta_5m) + A_c_FP
+    return b*n_b_FP*(eta_3m - h_s_FP + L/2*eta_5m) + A_c_FP  # Changed sign
 
 
 def r_j(x, j, L):
