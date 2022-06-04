@@ -15,7 +15,7 @@ from utilitiesBBGreen import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value
 # ***** Define input parameters *****
 
 # Wave parameters
-H_s = 0.15  # [m] significant wave height
+H_s = 0.1  # [m] significant wave height
 T_p = 1.5  # [s] wave peak period
 
 # Physical constants
@@ -50,7 +50,7 @@ p_0 = 3500  # [Pa] mean excess pressure in the air cushion
 h_0 = 0.64  #2 # [m]  Height of the air cushion  # TODO: make sure this value is correct
 h = p_0 / rho / g  # [m] Difference in water level inside and outside the air cushion
 
-x_F_c = 17.7  # [m]  Distance from AP to fan inlet  # Measured in Rhino7
+x_F_c = 17.7  #18  #  [m]  Distance from AP to fan inlet  # Measured in Rhino7
 
 # Calculate initial density of air in air cushion
 rho_0 = rho_a * ((p_0 + p_a) / p_a) ** (1 / gamma)  # [kg/m^3] Density of air at mean cushion pressure (p_0 + p_a)
@@ -117,7 +117,7 @@ M[1, 1] = r55**2 * m  # [kg m^2] I_55
 
 
 # Other parameters
-h_s_AP = 0.2  # [m] aft seal submergence
+h_s_AP = 0.05  # [m] aft seal submergence
 h_s_FP = 0.1  # [m] bow seal submergence
 # Centroid of the air cushion at equilibrium relative to the motion coord. system
 x_cp = x_prime - x_B_c  # [m] longitudinal position
@@ -126,6 +126,9 @@ z_cp = -h / 2  # [m] vertical position
 x_g_AP = L / 2 - x_cp  # [m] position of leakage at AP relative to center of gravity
 x_g_FP = -L / 2 - x_cp  # [m] position of leakage at FP relative to center of gravity
 lcg_fan = L/2 - x_F_c - x_cp  # [m] Longitudinal fan position (from CG)  # TODO: Make sure this is correct
+
+# Append destabilizing moment due to air-cushion
+C_55 += p_0 * z_cp * A_c0  # C_55
 
 # Excitation
 F_3a = f_ex_temp[2, :]
@@ -150,7 +153,7 @@ x_f = -(l_1 - x_prime)  # [m]
 y_s = b/2  # [m]
 y_p = -b/2  # [m]
 x_b = -(l_1 + l_2 - x_prime)  # [m]
-F_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_0, U, b)
+F_wp = wave_pumping_excitation_sesx(x_f, x_s, y_s, x_b, omega_0, U, beta)
 
 # Plot for testing:
 '''
@@ -495,6 +498,24 @@ df_uniform = pd.read_csv(
 color_BBGreen = '#5cb16d'
 color_BBPurple = '#b15ca0'
 
+# Plotting wave spectrum
+plotWaveSpectrum = True
+if plotWaveSpectrum:
+
+    f_e_PM = np.linspace(0.1, 50, 1000)
+    omega_0_PM = g/2/U*(np.sqrt(1 + 8*np.pi*U/g*f_e_PM) - 1)
+    plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p), color=color_BBGreen)
+
+    #plt.plot(f_encounter, PM_spectrum(omega_0, H_s, T_p))
+    plt.xlabel(r'\textrm{Encounter frequency\,[Hz]}')
+    plt.ylabel(r'$S_{\zeta}\,[m^2s]$')
+    plt.xlim([0.1, 50])
+    #plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
+    plt.savefig('Results/mod_PM_spectrum.pdf', bbox_inches='tight')
+    plt.show()
+
+    #plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p))
+
 # Divide by wave amplitude, but makes sure zeta_a is not zero
 mu_ua_nondim = np.zeros([n_freq])
 for i in range(n_freq):
@@ -505,11 +526,11 @@ save_RAOs_for_comparison = True
 
 plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\hat{\eta}_{7}|\,[-] /\zeta_a\,[m]$')
+plt.ylabel(r'$|\hat{\eta}_{7}|\,/\,\zeta_a\,[m^{-1}]$')
 x_min = 0.
 plt.xlim([x_min, 16])
 plt.ylim([0, np.max(mu_ua_nondim[f_encounter > x_min])])
-plt.legend()
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/uniform pressure.pdf', bbox_inches='tight')
 plt.show()
@@ -528,8 +549,8 @@ plt.plot(f_encounter, vert_acc_FP_nondim, label=r'\textrm{Computed}', color=colo
 plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_acc_FP_nondim[f_encounter > x_min])])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'\textrm{Vert. acc.} $\,[m/s^2] / \zeta_a\,[m]$')
-plt.legend()
+plt.ylabel(r'\textrm{Vert. acc. at the bow} $\,/\,\zeta_a\,[s^{-2}]$')
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/vert acc bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
@@ -538,8 +559,8 @@ plt.plot(f_encounter, vert_motion_FP_nondim, label=r'\textrm{Computed}', color=c
 plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_motion_FP_nondim[f_encounter > x_min])])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'\textrm{Vert. motion} $\,[m] / \zeta_a\,[m]$')
-plt.legend()
+plt.ylabel(r'\textrm{Vert. motion at the bow} $\,/\,\zeta_a\,[-]$')
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/vert motion bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
@@ -549,7 +570,7 @@ plt.plot(f_encounter, np.absolute(eta_3a), label=r'\textrm{Computed}', color=col
 plt.xlim([x_min, 16.])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
-plt.legend()
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/heave against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
@@ -558,7 +579,7 @@ plt.plot(water_wavelength, np.absolute(eta_3a), label=r'\textrm{Computed}', colo
 plt.xlim([x_min, 50.])
 plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
 plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
-plt.legend()
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/heave against wavelength.pdf', bbox_inches='tight')
 plt.show()
@@ -569,7 +590,7 @@ plt.xlim([x_min, 16.])
 #plt.ylim([0, np.max(vert_motion_FP_nondim[f_encounter > x_min])])
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
-plt.legend()
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/pitch against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
@@ -578,7 +599,7 @@ plt.plot(water_wavelength, np.absolute(np.divide(eta_5a, k)), label=r'\textrm{Co
 plt.xlim([x_min, 50.])
 plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
 plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
-plt.legend()
+#plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/RAOs/pitch against wavelength.pdf', bbox_inches='tight')
 plt.show()
