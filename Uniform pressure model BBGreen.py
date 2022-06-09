@@ -58,6 +58,7 @@ k = np.power(omega_0, 2) / g
 omega_e = omega_0 + U / g * np.multiply(np.power(omega_0, 2), np.cos(np.rad2deg(beta)))  # [rad/s] encounter freq.
 f_enc = omega_e / 2 / np.pi  # [Hz] encounter frequency
 k_enc = np.power(omega_e, 2) / g
+wavelength = np.divide(2*np.pi, k)
 
 # Initialize vectors for hydrodynamic coeffs. and loads
 A = np.zeros([len(omega_0), 3, 3])
@@ -168,12 +169,23 @@ def it_nat_freq(M, A_vec, C, omega_e, g=9.81):
     return omega_nat
 
 # heave - iterated
-omega_03_BBGreen_it = it_nat_freq(M[0, 0], A[:, 0, 0], C[0, 0], omega_e)
-f_03_it = omega_03_BBGreen_it / 2 / np.pi
+omega_03_it = it_nat_freq(M[0, 0], A[:, 0, 0], C[0, 0], omega_e)
+f_03_it = omega_03_it / 2 / np.pi
 
 # pitch - iterated
 omega_05_it = it_nat_freq(M[1, 1], A[:, 1, 1], C[1, 1], omega_e)
 f_05_it = omega_05_it / 2 / np.pi
+
+# Compute damping ratio of heave and pitch
+xi_03 = np.interp(omega_03_it, omega_e, B[:, 0, 0])/(2*(M[0, 0] + np.interp(omega_03_it, omega_e, A[:, 0, 0]))*omega_03_it)
+xi_05 = np.interp(omega_05_it, omega_e, B[:, 1, 1])/(2*(M[1, 1] + np.interp(omega_03_it, omega_e, A[:, 1, 1]))*omega_05_it)
+
+# Computing damping ratio
+
+omega_3u = np.sqrt(A_c0*gamma*(p_0 + p_a)/total_mass/h_0)
+
+xi_3u = (0.5*Q_0 - dQdp_0*p_0)*gamma*(1+p_a/p_0)/(2*h_0*A_c0*omega_3u)
+
 
 # Plotting RAOs
 
@@ -183,78 +195,132 @@ color_BBPurple = '#b15ca0'
 
 save_plots = True
 
+plt.plot(wavelength, np.absolute(f_ex[0, :]), color=color_BBGreen)
+plt.xlabel(r'\textrm{Wavelength} $[m]$')
+plt.ylabel(r'$|\hat{F}_3|\,/\,\zeta_a\,[N/m]$')
+plt.xlim([0., 25.])
+plt.ylim([0., 80000.])
+if save_plots:
+    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/heave force against wavelength.pdf',
+                bbox_inches='tight')
+plt.show()
 
-# heave motion
-# , fillstyle='none', marker='o', linestyle='-'
-# , '-x'
-plt.plot(f_enc, np.absolute(raos[0]), label='with wave pumping', color=color_BBGreen)
-plt.plot(f_enc, np.absolute(raos_no_WP[0]), label='without wave pumping', color=color_BBPurple)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\hat{\eta}_3|\,/\,\zeta_a\,[-]$')
-plt.xlim([0., 3])
+plt.plot(wavelength, np.absolute(f_ex[1, :]), color=color_BBGreen)
+plt.xlabel(r'\textrm{Wavelength} $[m]$')
+plt.ylabel(r'$|\hat{F}_5|\,/\,\zeta_a\,[Nm/m]$')
+plt.xlim([0., 25.])
 plt.gca().set_ylim(bottom=0)
-plt.legend()
 if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/heave against encounter frequency.pdf', bbox_inches='tight')
+    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/pitch moment against wavelength.pdf',
+                bbox_inches='tight')
 plt.show()
 
-# heave  acceleration
-plt.plot(f_enc, np.absolute(np.multiply(np.power(omega_e, 2), raos[0])), label='with wave pumping', color=color_BBGreen)
-plt.plot(f_enc, np.absolute(np.multiply(np.power(omega_e, 2), raos_no_WP[0])), label='without wave pumping', color=color_BBPurple)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\omega_e^2\hat{\eta}_3|\,/\,\zeta_a\,[s^{-2}]$')
-plt.xlim([0., 16])
-plt.gca().set_ylim(bottom=0)
-plt.legend()
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/heave acc against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+plot_figures = True
+if plot_figures:
 
-# pitch
-plt.plot(f_enc, np.divide(np.absolute(raos[1]), k), label='with wave pumping', color=color_BBGreen)
-plt.plot(f_enc, np.divide(np.absolute(raos_no_WP[1]), k), label='without wave pumping', color=color_BBPurple)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\hat{\eta}_5|\,/\,k \zeta_a\,[-]$')
-plt.xlim([0., 3])
-plt.gca().set_ylim(bottom=0)
-plt.legend()
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/pitch against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+    # heave motion
+    # , fillstyle='none', marker='o', linestyle='-'
+    # , '-x'
+    plt.plot(f_enc, np.absolute(raos[0]), label='with wave pumping', color=color_BBGreen)
+    plt.plot(f_enc, np.absolute(raos_no_WP[0]), label='without wave pumping', color=color_BBPurple)
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$|\hat{\eta}_3|\,/\,\zeta_a\,[-]$')
+    plt.xlim([0., 3])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/heave against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
 
-# pitch acceleration
-plt.plot(f_enc, np.multiply(np.divide(np.absolute(raos[1]), k), np.power(omega_e, 2)), label='with wave pumping', color=color_BBGreen)
-plt.plot(f_enc, np.multiply(np.divide(np.absolute(raos_no_WP[1]), k), np.power(omega_e, 2)), label='without wave pumping', color=color_BBPurple)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\omega_e^2\hat{\eta}_5|\,/\,k \zeta_a\,[s^{-2}]$')
-plt.xlim([0., 3])
-plt.gca().set_ylim(bottom=0)
-plt.legend()
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/pitch acc against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+    # heave  acceleration
+    plt.plot(f_enc, np.absolute(np.multiply(np.power(omega_e, 2), raos[0])), label='with wave pumping', color=color_BBGreen)
+    plt.plot(f_enc, np.absolute(np.multiply(np.power(omega_e, 2), raos_no_WP[0])), label='without wave pumping', color=color_BBPurple)
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$|\omega_e^2\hat{\eta}_3|\,/\,\zeta_a\,[s^{-2}]$')
+    plt.xlim([0., 16])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/heave acc against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
 
-plt.plot(f_enc, np.absolute(raos[2]), color=color_BBGreen)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\hat{\eta}_7|\,[-]$')
-plt.xlim([0., 16])
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/uniform pressure against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+    # pitch
+    plt.plot(f_enc, np.divide(np.absolute(raos[1]), k), label='with wave pumping', color=color_BBGreen)
+    plt.plot(f_enc, np.divide(np.absolute(raos_no_WP[1]), k), label='without wave pumping', color=color_BBPurple)
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$|\hat{\eta}_5|\,/\,k \zeta_a\,[-]$')
+    plt.xlim([0., 3])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/pitch against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
+
+    # pitch acceleration
+    plt.plot(f_enc, np.multiply(np.divide(np.absolute(raos[1]), k), np.power(omega_e, 2)), label='with wave pumping', color=color_BBGreen)
+    plt.plot(f_enc, np.multiply(np.divide(np.absolute(raos_no_WP[1]), k), np.power(omega_e, 2)), label='without wave pumping', color=color_BBPurple)
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$|\omega_e^2\hat{\eta}_5|\,/\,k \zeta_a\,[s^{-2}]$')
+    plt.xlim([0., 3])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/pitch acc against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
+
+    plt.plot(f_enc, np.absolute(raos[2]), color=color_BBGreen, label='with wave pumping')
+    plt.plot(f_enc, np.absolute(raos_no_WP[2]), color=color_BBPurple, label='without wave pumping')
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$|\hat{\eta}_7|\,/\,\zeta_a\,[m^{-1}]$')
+    plt.xlim([0., 16])
+    plt.gca().set_ylim(bottom=-0.1)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/uniform pressure against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
 
 
-plt.plot(f_enc, np.absolute(raos[0] + Lpp/2*raos[1]), color=color_BBGreen)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$\textrm{Vert. motion at the bow}\,/\,\zeta_a\,[-]$')
-plt.xlim([0., 16])
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/vert motion at bow against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+    plt.plot(f_enc, np.absolute(raos[0] + Lpp/2*raos[1]), color=color_BBGreen, label='with wave pumping')
+    plt.plot(f_enc, np.absolute(raos_no_WP[0] + Lpp/2*raos_no_WP[1]), color=color_BBPurple, label='without wave pumping')
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$\textrm{Vert. motion at the bow}\,/\,\zeta_a\,[-]$')
+    plt.xlim([0., 16.])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/vert motion at bow against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
 
-plt.plot(f_enc, np.multiply(np.absolute(raos[0] + Lpp/2*raos[1]), np.power(omega_e, 2)), color=color_BBGreen)
-plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$\textrm{Vert. acc at the bow}\,/\,\zeta_a\,[s^{-2}]$')
-plt.xlim([0., 16])
-if save_plots:
-    plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/vert acc at bow against encounter frequency.pdf', bbox_inches='tight')
-plt.show()
+    plt.plot(f_enc, np.multiply(np.absolute(raos[0] + Lpp/2*raos[1]), np.power(omega_e, 2)), color=color_BBGreen, label='with wave pumping')
+    plt.plot(f_enc, np.multiply(np.absolute(raos_no_WP[0] + Lpp/2*raos_no_WP[1]), np.power(omega_e, 2)), color=color_BBPurple, label='without wave pumping')
+    plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
+    plt.ylabel(r'$\textrm{Vert. acc. at the bow}\,/\,\zeta_a\,[s^{-2}]$')
+    plt.xlim([0., 16.])
+    plt.gca().set_ylim(bottom=0)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/vert acc at bow against encounter frequency.pdf', bbox_inches='tight')
+    plt.show()
+
+    plt.plot(wavelength, np.multiply(np.absolute(raos[0] + Lpp/2*raos[1]), np.power(omega_e, 2)), color=color_BBGreen, label='with wave pumping')
+    plt.plot(wavelength, np.multiply(np.absolute(raos_no_WP[0] + Lpp/2*raos_no_WP[1]), np.power(omega_e, 2)), color=color_BBPurple, label='without wave pumping')
+    plt.xlabel(r'\textrm{Wavelength} $[m]$')
+    plt.ylabel(r'$\textrm{Vert. acc. at the bow}\,/\,\zeta_a\,[s^{-2}]$')
+    plt.xlim([0., 25.])
+    #plt.gca().set_ylim(bottom=0)
+    plt.ylim([0., 40.])
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/vert acc at bow against wavelength.pdf', bbox_inches='tight')
+    plt.show()
+
+    plt.plot(wavelength, np.absolute(raos[2]), color=color_BBGreen, label='with wave pumping')
+    plt.plot(wavelength, np.absolute(raos_no_WP[2]), color=color_BBPurple, label='without wave pumping')
+    plt.xlabel(r'\textrm{Wavelength} $[m]$')
+    plt.ylabel(r'$|\hat{\eta}_7|\,/\,\zeta_a\,[m^{-1}]$')
+    plt.xlim([0., 25.])
+    plt.gca().set_ylim(bottom=-0.1)
+    plt.legend()
+    if save_plots:
+        plt.savefig('Results/Results and discussion/Uniform pressure model/RAOs/uniform pressure against wavelength.pdf', bbox_inches='tight')
+    plt.show()

@@ -16,7 +16,7 @@ from utilitiesBBGreen import K_1, K_2, K_3, K_4, Xi_j, Omega_j, solve_mean_value
 
 # Wave parameters
 H_s = 0.1  # [m] significant wave height
-T_p = 1.5  # [s] wave peak period
+T_p = 1.  # [s] wave peak period
 
 # Physical constants
 c = 343.  # [m/s] Speed of sound in air
@@ -117,8 +117,8 @@ M[1, 1] = r55**2 * m  # [kg m^2] I_55
 
 
 # Other parameters
-h_s_AP = 0.05  # [m] aft seal submergence
-h_s_FP = 0.1  # [m] bow seal submergence
+h_s_AP = 0.3  # [m] aft seal submergence
+h_s_FP = 0.02  # [m] bow seal submergence
 # Centroid of the air cushion at equilibrium relative to the motion coord. system
 x_cp = x_prime - x_B_c  # [m] longitudinal position
 y_cp = 0  # [m] transverse position
@@ -132,7 +132,7 @@ C_55 += p_0 * z_cp * A_c0  # C_55
 
 # Excitation
 F_3a = f_ex_temp[2, :]
-F_5a = f_ex_temp[4, :]  # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
+F_5a = f_ex_temp[4, :] # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
 
 k = np.power(omega_0, 2) / g  # wave number of water waves
 omega_e = omega_0 + np.power(omega_0, 2) / g * U  # encounter frequencies
@@ -255,7 +255,7 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
     a_0_AP = np.maximum(A_0_AP(L, b, n_B_AP, eta_3m, eta_5m, h_s_AP), 0)  # , 0.5) #
     a_0_FP = np.maximum(A_0_FP(L, b, n_B_FP, eta_3m, eta_5m, h_s_FP), 0)  # , 0.5) #
 
-    j_max = 5  # number of acoustic modes to include in the calculations
+    j_max = 10  # number of acoustic modes to include in the calculations
 
     A_mat = np.zeros([3, 3, n_freq], dtype=complex)  # initialize coefficient matrix for linear system of eq.
     f_vec = np.zeros([3, n_freq], dtype=complex)  # initialize column vector on the right hand side of the equation
@@ -486,9 +486,9 @@ while ((rel_err > epsi) or (counter < 2)) and (counter < max_iter):
 store_results = False
 if store_results:
     df_result = pd.DataFrame(
-        {'f_enc [Hz]': f_encounter, 'zeta_a [m]': zeta_a, 'eta_3a [m]': np.abs(eta_3a), 'eta_5a [rad]': np.abs(eta_5a),
-         'mu_ua [-]': np.abs(mu_ua)})
-    df_result.to_csv('Results/results_Test1.csv')
+        {'omega_0 [rad/s]': omega_0, 'zeta_a [m]': zeta_a, 'eta_3a [m]': eta_3a, 'eta_5a [rad]': eta_5a,
+         'mu_ua [-]': mu_ua})
+    df_result.to_csv('Results/RAOs/RAO_with_wave_pumping.csv')
 
 # Compare with Steen and Faltinsen (1995)
 df_uniform = pd.read_csv(
@@ -502,14 +502,14 @@ color_BBPurple = '#b15ca0'
 plotWaveSpectrum = True
 if plotWaveSpectrum:
 
-    f_e_PM = np.linspace(0.1, 50, 1000)
+    f_e_PM = np.linspace(0.001, 16, 1000)
     omega_0_PM = g/2/U*(np.sqrt(1 + 8*np.pi*U/g*f_e_PM) - 1)
     plt.plot(f_e_PM, PM_spectrum(omega_0_PM, H_s, T_p), color=color_BBGreen)
 
     #plt.plot(f_encounter, PM_spectrum(omega_0, H_s, T_p))
     plt.xlabel(r'\textrm{Encounter frequency\,[Hz]}')
     plt.ylabel(r'$S_{\zeta}\,[m^2s]$')
-    plt.xlim([0.1, 50])
+    plt.xlim([0, 16])
     #plt.title('U = ' + str(round(U, 2)) + '[m/s], $H_s$ = ' + str(H_s) + '[m], $T_p$ = ' + str(T_p) + '[s], $\\beta=0^\\degree$')
     plt.savefig('Results/mod_PM_spectrum.pdf', bbox_inches='tight')
     plt.show()
@@ -522,7 +522,7 @@ for i in range(n_freq):
     if zeta_a[i] > 1e-20:
         mu_ua_nondim[i] = np.abs(mu_ua[i]) / zeta_a[i]  # 1 #
 
-save_RAOs_for_comparison = True
+save_RAOs_for_comparison = False
 
 plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
@@ -532,7 +532,7 @@ plt.xlim([x_min, 16])
 plt.ylim([0, np.max(mu_ua_nondim[f_encounter > x_min])])
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/uniform pressure.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP uniform pressure.pdf', bbox_inches='tight')
 plt.show()
 
 df_vert_acc = pd.read_csv(
@@ -552,7 +552,7 @@ plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'\textrm{Vert. acc. at the bow} $\,/\,\zeta_a\,[s^{-2}]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/vert acc bow against encounter frequency.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP vert acc bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
 plt.plot(f_encounter, vert_motion_FP_nondim, label=r'\textrm{Computed}', color=color_BBGreen)
@@ -562,7 +562,7 @@ plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'\textrm{Vert. motion at the bow} $\,/\,\zeta_a\,[-]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/vert motion bow against encounter frequency.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP vert motion bow against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
 # Heave RAO
@@ -572,7 +572,7 @@ plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/heave against encounter frequency.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP heave against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
 plt.plot(water_wavelength, np.absolute(eta_3a), label=r'\textrm{Computed}', color=color_BBGreen)
@@ -581,7 +581,7 @@ plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
 plt.ylabel(r'$\hat{\eta}_3\,/\,\zeta_a\,[-]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/heave against wavelength.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP heave against wavelength.pdf', bbox_inches='tight')
 plt.show()
 
 # Pitch RAO
@@ -592,7 +592,7 @@ plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
 plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/pitch against encounter frequency.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP pitch against encounter frequency.pdf', bbox_inches='tight')
 plt.show()
 
 plt.plot(water_wavelength, np.absolute(np.divide(eta_5a, k)), label=r'\textrm{Computed}', color=color_BBGreen)
@@ -601,7 +601,7 @@ plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
 plt.ylabel(r'$\hat{\eta}_5\,\,/\,k\zeta_a\,[-]$')
 #plt.legend()
 if save_RAOs_for_comparison:
-    plt.savefig('Results/RAOs/pitch against wavelength.pdf', bbox_inches='tight')
+    plt.savefig('Results/RAOs/no WP pitch against wavelength.pdf', bbox_inches='tight')
 plt.show()
 
 print('The iteration scheme converged after', counter)

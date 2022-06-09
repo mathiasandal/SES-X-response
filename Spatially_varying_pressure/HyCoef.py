@@ -16,7 +16,7 @@ def compute_hydrodynamic_coeff(L_c, Bs, U, omega_0, rho_w=1025., g=9.81):
     # 2D damping term of a rectangular cross-section
     B_33_2D = 2 * rho_w * Bs**2 * omega_e * (1 - np.tanh(4*omega_e**np.sqrt(Bs/2/g) - np.pi))
 
-    include_end_terms = True
+    include_end_terms = False
     if include_end_terms:
         A_33_0 = A_33_2D * L_c
         A_33 = A_33_0 - np.divide(U * B_33_2D, np.power(omega_e, 2))

@@ -48,7 +48,6 @@ Q_0 = 150.  # [m^3/s] Mean fan flow rate
 dQdp_0 = -140.  # [m^2/s] Linear fan slope
 dQdp_0 = dQdp_0 / rho_w / g  # [(m^3/s)/Pa] Linear fan slope
 
-
 x_F = 5.6  # [m]
 
 # Calculate initial density of air in air cushion
@@ -120,8 +119,8 @@ for i in range(6):
         f_ex[i, j] = REFORCE[i, j, 0, 0] + 1j * IMFORCE[i, j, 0, 0]
 '''
 
-F_3a = f_ex[2, :]
-F_5a = -f_ex[4, :]  # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
+F_3a = f_ex[2, :]*0
+F_5a = -f_ex[4, :]*0  # TEST TO SEE WHAT HAPPENS WHEN THE SIGN IS CHANGED
 
 #omega_0 = np.linspace(1, 10, 1000)
 omega_0 = FREQ_re7
@@ -139,7 +138,7 @@ encounter_wavelength = g/2/np.pi * np.power(np.divide(2*np.pi, omega_e), 2)
 A_33, A_35, A_53, A_55, B_33, B_35, B_53, B_55 = compute_hydrodynamic_coeff(L_oa, b_s, U, omega_0)
 
 # ***** Compute wave pumping *****
-F_wp =  A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)  # 1) #
+F_wp = A_c * np.multiply(np.multiply(omega_e, np.divide(np.sin(k*L/2), k*L/2)), zeta_a)  # 1) #
 
 # Plot for testing:
 '''
@@ -500,7 +499,7 @@ plt.plot(f_encounter, mu_ua_nondim, label=r'\textrm{Computed}', color=color_BBGr
 plt.plot(df_uniform.iloc[:, 1], df_uniform.iloc[:, 2], label=r'\textrm{Steen and O. M. Faltinsen (1995)}', color=color_BBPurple)
 #plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'$|\hat{\eta}_{7}|\,[-] /\zeta_a\,[m]$')
+plt.ylabel(r'$|\hat{\eta}_{7}|\,/\,\zeta_a\,[m^{-1}]$')
 x_min = 0.
 plt.xlim([x_min, 16])
 plt.ylim([0, np.max(mu_ua_nondim[f_encounter > x_min])])
@@ -527,7 +526,7 @@ plt.xlim([x_min, 16.])
 plt.ylim([0, np.max(vert_acc_AP_nondim[f_encounter > x_min])])
 #plt.title(r'\textrm{Comparison with Steen and Faltinsen (1995)}')
 plt.xlabel(r'\textrm{Encounter frequency} $[Hz]$')
-plt.ylabel(r'\textrm{Vert. acc.} $\,[m/s^2] / \zeta_a\,[m]$')
+plt.ylabel(r'\textrm{Vert. acc.} $\,/\,\zeta_a\,[s^{-2}]$')
 plt.legend()
 if save_RAOs_for_comparison:
     plt.savefig('Results/Comparison RAOs/vert_acc_bow.pdf', bbox_inches='tight')

@@ -11,8 +11,8 @@ U = 50.  # [kn]
 U = U * 0.51444  # [m/s]
 
 # Properties of SES-X air cushion
-l_1 = 2   # 0.0001  #     [m] length of the rectangular part of the air cushion
-l_2 = 10  # 0.001  #      [m] length of the triangular part of the air cushion
+l_1 = 12   # 0.0001  #     [m] length of the rectangular part of the air cushion
+l_2 = 6  # 0.001  #      [m] length of the triangular part of the air cushion
 b = 3.4  # [m] beam of the air cushion
 # Location of motion coordinate system relative to intersection of AP, CL and BL
 x_prime = 4  # [m]
@@ -55,7 +55,8 @@ plt.plot(f_enc, np.absolute(f_wp_rect), label=r'Rectangle', color=color_BBPurple
 plt.plot(f_enc, np.absolute(f_wp_sesx), label=r'BBGreen', color=color_BBGreen)
 plt.xlabel(r'$\textrm{Encounter frequency}\,[Hz]$')
 plt.ylabel(r'$|\hat{F}_{\textit{WP}}|\,/\,\zeta_a\,[m^2/s]$')
-plt.xlim([0.1, 16])
+plt.xlim([0., 16])
+plt.gca().set_ylim(bottom=0)
 plt.legend()
 if save_plots:
     plt.savefig('Results/Results and discussion/Wave pumping BBGreen/WP against encounter frequency.pdf', bbox_inches='tight')
@@ -65,7 +66,8 @@ plt.plot(wavelength, np.absolute(f_wp_rect), label='Rectangle', color=color_BBPu
 plt.plot(wavelength, np.absolute(f_wp_sesx), label='BBGreen', color=color_BBGreen)
 plt.xlabel(r'$\textrm{Wavelength}\,[m]$')
 plt.ylabel(r'$|\hat{F}_{\textit{WP}}|\,/\,\zeta_a\,[m^2/s]$')
-plt.xlim([0.1, 25])
+plt.xlim([0., 25])
+plt.gca().set_ylim(bottom=0)
 plt.legend()
 if save_plots:
     plt.savefig('Results/Results and discussion/Wave pumping BBGreen/WP against wavelength.pdf', bbox_inches='tight')
