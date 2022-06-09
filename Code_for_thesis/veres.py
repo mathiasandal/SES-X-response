@@ -3,7 +3,6 @@ from pathlib import Path
 
 '''Contains all functions related to things retrieved from VERES'''
 
-
 def read_re7_file(filename):
     """
     Reads a *.re7 file created by VERES
@@ -36,7 +35,7 @@ def read_re7_file(filename):
     SINK = np.zeros(NOVEL)  # [m] Sink
     TRIM = np.zeros(NOVEL)  # [deg] Trim
     XMTN = np.zeros(NOVEL)  # [m] X-pos. of the motion coordinate system (relative to Lpp/2)
-    ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the mo􀆟on coordinate system (relative to BL)
+    ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the motion coordinate system (relative to BL)
 
     # Read in mass matrix
     VMAS = np.zeros([6, 6])  # Initialize mass matrix. Has the size (6x6) regardless if there is an air cushion or not.
@@ -120,7 +119,7 @@ def read_re8_file(filename):
     SINK = np.zeros(NOVEL)  # [m] Sink
     TRIM = np.zeros(NOVEL)  # [deg] Trim
     XMTN = np.zeros(NOVEL)  # [m] X-pos. of the motion coordinate system (relative to Lpp/2)
-    ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the mo􀆟on coordinate system (relative to BL)
+    ZMTN = np.zeros(NOVEL)  # [m] Z-pos. of the motion coordinate system (relative to BL)
 
     # Initialize Force components
     # For High-Speed formulation only the total excitation force is given
@@ -231,7 +230,7 @@ def read_group_of_re8_input(filepath):
 
 
 def read_coefficients_from_veres(path):
-    """Read hydrodynamic coefficients and loads from several rund in VERES"""
+    """Read hydrodynamic coefficients and loads from several runs in VERES"""
 
     # Read hydrodynamic coefficients
     M, A, B, C, U, beta, omega_0, XMTN, ZMTN, lcg_veres, vcg_veres, NDOF = read_group_of_re7_input(path)
